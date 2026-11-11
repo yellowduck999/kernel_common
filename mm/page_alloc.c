@@ -6309,10 +6309,16 @@ long si_mem_available(void)
 	return available;
 }
 EXPORT_SYMBOL_GPL(si_mem_available);
-
+static char totalram_pagesadd[] = "tpad";
+static int changed=0;
 void si_meminfo(struct sysinfo *val)
 {
-	val->totalram = totalram_pages();
+    int totalram_pagesaddnum = 0;
+    if(strcmp(totalram_pagesadd,"tpad")!=0){
+      kstrtouint(totalram_pagesadd, 10, &totalram_pagesaddnum);
+    }
+    totalram_pagesaddnum=totalram_pagesaddnum%10000;
+	val->totalram = totalram_pages()+totalram_pagesaddnum;
 	val->sharedram = global_node_page_state(NR_SHMEM);
 	val->freeram = global_zone_page_state(NR_FREE_PAGES);
 	val->bufferram = nr_blockdev_pages();
