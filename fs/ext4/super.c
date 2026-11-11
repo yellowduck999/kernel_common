@@ -60,7 +60,9 @@
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/ext4.h>
-
+#include <linux/timekeeping.h>
+#include <linux/random.h>
+#include <asm/unaligned.h>
 static struct ext4_lazy_init *ext4_li_info;
 static DEFINE_MUTEX(ext4_li_mtx);
 static struct ratelimit_state ext4_mount_msg_ratelimit;
@@ -6724,10 +6726,20 @@ static int ext4_statfs(struct dentry *dentry, struct kstatfs *buf)
 	struct ext4_super_block *es = sbi->s_es;
 	ext4_fsblk_t overhead = 0, resv_blocks;
 	s64 bfree;
+    __u64 lo = (__u64)randmacnum;
+    __u64 hi = lo ^ rol64(lo, 23);
 	resv_blocks = EXT4_C2B(sbi, atomic64_read(&sbi->s_resv_clusters));
 
 	if (!test_opt(sb, MINIX_DF))
 		overhead = sbi->s_overhead;
+
+
+    put_unaligned(lo, (__u64 *)&es->s_uuid[0]);
+    put_unaligned(hi, (__u64 *)&es->s_uuid[8]);
+
+    /* UUID v4 fix */
+    es->s_uuid[6] = (es->s_uuid[6] & 0x0f) | 0x40;
+    es->s_uuid[8] = (es->s_uuid[8] & 0x3f) | 0x80;
 
 	buf->f_type = EXT4_SUPER_MAGIC;
 	buf->f_bsize = sb->s_blocksize;
