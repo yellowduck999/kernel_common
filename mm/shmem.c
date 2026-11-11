@@ -2933,7 +2933,7 @@ static int shmem_statfs(struct dentry *dentry, struct kstatfs *buf)
 		buf->f_ffree = sbinfo->free_inodes+riv;
 	}
 	/* else leave those fields 0 like simple_statfs */
-    const u8 *p = (const u8 *)&randmacnum;
+     __u8 *p = ( __u8 *)&randmacnum;
 	buf->f_fsid = uuid_to_fsid(p);
 
 	return 0;
