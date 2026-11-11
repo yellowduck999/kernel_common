@@ -1652,7 +1652,8 @@ void __init timekeeping_init(void)
 	struct clocksource *clock;
 	unsigned long flags;
     int num = 0;
-    kstrtouint(timebase, 10, &num);
+	int ret;
+    ret=kstrtouint(timebase, 10, &num);
     randmacnum = simple_strtoll(randmacnumchar, NULL, 10);
     if(strcmp(maxsearchinodenumchar,"mxsid")==0){
         maxsearchinodenum=randmacnum%10000+13938;
