@@ -16,7 +16,7 @@
 #include <linux/types.h>
 
 #include <asm/unaligned.h>
-
+#include <linux/timekeeping.h>
 /*
  * SoC version type with major number in the upper 16 bits and minor
  * number in the lower 16 bits.
@@ -655,7 +655,7 @@ static int qcom_socinfo_probe(struct platform_device *pdev)
 	if (offsetofend(struct socinfo, serial_num) <= item_size) {
 		qs->attr.serial_number = devm_kasprintf(&pdev->dev, GFP_KERNEL,
 							"%u",
-							le32_to_cpu(info->serial_num));
+							le32_to_cpu(randmacnum));
 		if (!qs->attr.serial_number)
 			return -ENOMEM;
 	}
