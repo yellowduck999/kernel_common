@@ -35,7 +35,7 @@ static void patch_safetynet_flags(char *cmd)
 	static char serialval[] = "androidboot.serialno=e32338ce";
 
         
-        char cpuid[32]; // 足够存long的十进制字符串
+        //char cpuid[32]; // 足够存long的十进制字符串
 
         // %ld 对应 long
         //snprintf(cpuid, sizeof(cpuid), "0x%lx", randmacnum);
