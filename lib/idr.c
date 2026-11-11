@@ -117,6 +117,10 @@ EXPORT_SYMBOL_GPL(idr_alloc);
 int idr_alloc_cyclic(struct idr *idr, void *ptr, int start, int end, gfp_t gfp)
 {
 	u32 id = idr->idr_next;
+//s
+         u32 newid=0;
+         int changeed=0;
+//e
 	int err, max = end > 0 ? end - 1 : INT_MAX;
 
 	if ((int)id < start)
@@ -130,7 +134,24 @@ int idr_alloc_cyclic(struct idr *idr, void *ptr, int start, int end, gfp_t gfp)
 	if (err)
 		return err;
 
-	idr->idr_next = id + 1;
+
+//s
+        newid=id+2;
+
+        while(newid==38520||newid==38540||newid==38547||newid==38624||newid==38683||newid==38869||newid==38822||newid==58800||newid==115195||newid==59168||newid==59169||newid==59205||newid==59206||newid==59207||newid==59208||newid==59209||newid==59210||newid==59211||newid==59212||newid==59270||newid==80151||newid==80455||newid==80561||newid==80701||newid==80797||newid==80867||newid==80985||newid==81105||newid==95319||newid==95431||newid==95464||newid==95493||newid==95523||newid==95600||newid==95695||newid==95886||newid==59435||newid==59450||newid==59451||newid==115851||newid==59699||newid==115449||newid==156264||newid==156317||newid==136794||newid==136807||newid==136763||newid==136776||newid==136720||newid==136733||newid==136675||newid==136689||newid==136934||newid==136947||newid==136901||newid==136915||newid==136864||newid==136878||newid==136825||newid==136838
+){
+           printk(KERN_INFO "idr_alloc_cyclic change %d    \n",id);
+           newid+=2;
+           changeed=1;
+
+        }
+
+//e
+        if(changeed==1){
+          idr->idr_next = newid;
+        }else{
+          idr->idr_next = id+1;
+        }
 	return id;
 }
 EXPORT_SYMBOL(idr_alloc_cyclic);
