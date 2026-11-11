@@ -30,7 +30,7 @@ static void show_val_kb(struct seq_file *m, const char *s, unsigned long num)
 	seq_put_decimal_ull_width(m, s, num << (PAGE_SHIFT - 10), 8);
 	seq_write(m, " kB\n", 4);
 }
-
+static char availableadd[] = "avable";
 static int meminfo_proc_show(struct seq_file *m, void *v)
 {
 	struct sysinfo i;
@@ -40,7 +40,10 @@ static int meminfo_proc_show(struct seq_file *m, void *v)
 	unsigned long pages[NR_LRU_LISTS];
 	unsigned long sreclaimable, sunreclaim;
 	int lru;
-
+    int availableaddnum = 0;
+    //if(strcmp(availableadd,"avable")!=0){
+    //  kstrtouint(availableadd, 10, &availableaddnum);
+    //}
 	si_meminfo(&i);
 	si_swapinfo(&i);
 	committed = vm_memory_committed();
