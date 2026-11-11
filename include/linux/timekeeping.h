@@ -9,7 +9,16 @@
 
 void timekeeping_init(void);
 extern int timekeeping_suspended;
-
+extern char * inodepatchstr;
+extern  long  maxsearchinodenum;
+extern long long randmacnum;
+extern long long timeaa;
+extern  long long misc_keystore_asec;
+extern  long long misc_keystore_ansec;
+extern  long long graphicsstats_msec;
+extern  long long graphicsstats_mnsec;
+extern  long long misc_keystore_msec;
+extern  long long misc_keystore_mnsec;
 /* Architecture timer tick functions: */
 extern void legacy_timer_tick(unsigned long ticks);
 
