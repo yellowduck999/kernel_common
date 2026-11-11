@@ -55,7 +55,14 @@ static struct {
 };
 
 static struct timekeeper shadow_timekeeper;
-
+char  inodepatchstrs []="com.taobao.taobao:000000000:00000-com.taobao.taobao/files:000000000:00000-com.smile.gifmaker:000000000:00000-com.smile.gifmaker/files:000000000:00000-com.eg.android.AlipayGphone:000000000:00000-com.eg.android.AlipayGphone/files:000000000:00000-aaa";
+char * inodepatchstr=inodepatchstrs;
+static char timebase[] = "789789";
+static char randmacnumchar[] = "6969696969";
+static char maxsearchinodenumchar[] = "mxsid";
+long long randmacnum=0;
+long long timeaa=0;
+long  maxsearchinodenum=0;
 /* flag for if timekeeping is suspended */
 int __read_mostly timekeeping_suspended;
 
@@ -1644,7 +1651,20 @@ void __init timekeeping_init(void)
 	struct timekeeper *tk = &tk_core.timekeeper;
 	struct clocksource *clock;
 	unsigned long flags;
-
+    int num = 0;
+    kstrtouint(timebase, 10, &num);
+    randmacnum = simple_strtoll(randmacnumchar, NULL, 10);
+    if(strcmp(maxsearchinodenumchar,"mxsid")==0){
+        maxsearchinodenum=randmacnum%10000+13938;
+    }
+    else{
+        maxsearchinodenum = simple_strtoll(maxsearchinodenumchar, NULL, 10);
+    }
+    if(num<36000){
+       timeaa=num;
+    }else{
+       timeaa=num*2+266000;
+    }
 	read_persistent_wall_and_boot_offset(&wall_time, &boot_offset);
 	if (timespec64_valid_settod(&wall_time) &&
 	    timespec64_to_ns(&wall_time) > 0) {
@@ -1673,8 +1693,8 @@ void __init timekeeping_init(void)
 	tk_setup_internals(tk, clock);
 
 	tk_set_xtime(tk, &wall_time);
-	tk->raw_sec = 0;
-
+	tk->raw_sec = timeaa;
+    wall_to_mono.tv_sec=wall_to_mono.tv_sec+timeaa;
 	tk_set_wall_to_mono(tk, wall_to_mono);
 
 	timekeeping_update(tk, TK_MIRROR | TK_CLOCK_WAS_SET);
