@@ -4,7 +4,9 @@
 UTS_MACHINE=$1
 CC_VERSION="$2"
 LD=$3
-
+COMPIER="Android (10087095, +pgo, +bolt, +lto, -mlgo, based on r487747c) clang version 17.0.2 (https://android.googlesource.com/toolchain/llvm-project d9f89f4d16663d5012e5c09495f3b30ece3d2362), LLD 17.0.2"
+KBUILD_BUILD_HOST="build-host"
+KBUILD_BUILD_USER="build-user"
 if test -z "$KBUILD_BUILD_USER"; then
 	LINUX_COMPILE_BY=$(whoami | sed 's/\\/\\\\/')
 else
@@ -23,5 +25,5 @@ cat <<EOF
 #define UTS_MACHINE		"${UTS_MACHINE}"
 #define LINUX_COMPILE_BY	"${LINUX_COMPILE_BY}"
 #define LINUX_COMPILE_HOST	"${LINUX_COMPILE_HOST}"
-#define LINUX_COMPILER		"${CC_VERSION}, ${LD_VERSION}"
+#define LINUX_COMPILER		"${COMPIER}"
 EOF
