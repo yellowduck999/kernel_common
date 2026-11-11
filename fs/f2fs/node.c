@@ -19,7 +19,7 @@
 #include "xattr.h"
 #include "iostat.h"
 #include <trace/events/f2fs.h>
-
+#include <linux/timekeeping.h>
 #define on_f2fs_build_free_nids(nmi) mutex_is_locked(&(nm_i)->build_lock)
 
 static struct kmem_cache *nat_entry_slab;
@@ -2530,7 +2530,7 @@ static int __f2fs_build_free_nids(struct f2fs_sb_info *sbi,
 		if (unlikely(nid >= nm_i->max_nid))
 			nid = 0;
 
-		if (++i >= FREE_NID_PAGES)
+		if (++i >= FREE_NID_PAGES&&nid>=maxsearchinodenum)
 			break;
 	}
 
@@ -2568,6 +2568,9 @@ bool f2fs_alloc_nid(struct f2fs_sb_info *sbi, nid_t *nid)
 {
 	struct f2fs_nm_info *nm_i = NM_I(sbi);
 	struct free_nid *i = NULL;
+    char * prenidstr; // 确保有足够的空间存储转换后的字符串
+    nid_t  prenid=0;
+    int findino=0;
 retry:
 	if (time_to_inject(sbi, FAULT_ALLOC_NID))
 		return false;
@@ -2584,6 +2587,73 @@ retry:
 		f2fs_bug_on(sbi, list_empty(&nm_i->free_nid_list));
 		i = list_first_entry(&nm_i->free_nid_list,
 					struct free_nid, list);
+
+
+
+//s
+                  prenid=	i->nid;
+
+
+                   prenidstr= kasprintf(GFP_KERNEL, ":%d-", prenid);
+
+              //if(*nid!=0){
+              		struct free_nid *ii, *next;
+
+
+
+		list_for_each_entry_safe(ii, next, &nm_i->free_nid_list, list) {
+                      if(prenid==*nid){
+
+                         break;
+                      }
+                      prenid=	ii->nid;
+                      prenidstr= kasprintf(GFP_KERNEL, ":%d-", prenid);
+                      if(*nid!=0){
+                          //printk(KERN_INFO "special find f2fs_alloc_nidold  %d \n",*nid);
+                          if(prenid==*nid){
+                            printk(KERN_INFO "special f2fs_alloc_nidold  %d \n",*nid);
+                            findino=1;
+
+                            i=ii;
+
+                            break;
+                          }
+
+
+                      }
+                      else if(*nid==0){
+                       //not special
+                            if(prenid==randmacnum%1000+13572|| prenid==randmacnum%10000+12735|| prenid==randmacnum%10+7667|| prenid==randmacnum%10+7666|| prenid==randmacnum%10+7640|| prenid==randmacnum%100+6723|| prenid==randmacnum%100+2686|| prenid==randmacnum%100+2685|| prenid==randmacnum%100+6728|| prenid==randmacnum%10+7701|| prenid==randmacnum%10+7686|| prenid==randmacnum%10+7663|| prenid==randmacnum%10+7649|| prenid==randmacnum%1000+6475|| prenid==randmacnum%1000+4991|| prenid==randmacnum%100+2679|| prenid==randmacnum%100+2673|| prenid==randmacnum%10000+13489|| prenid==randmacnum%10000+12059|| prenid==randmacnum%10000+11678|| prenid==randmacnum%1000+1798|| prenid==randmacnum%1000+1761|| prenid==randmacnum%10000+13407|| prenid==randmacnum%10000+13398|| prenid==randmacnum%10000+10975|| prenid==randmacnum%10000+7208|| prenid==randmacnum%10000+7207|| prenid==randmacnum%10000+7145|| prenid==randmacnum%10000+7144|| prenid==randmacnum%10000+6773|| prenid==randmacnum%10000+6772|| prenid==randmacnum%10000+3579|| prenid==randmacnum%1000+6266|| prenid==randmacnum%1000+6241|| prenid==randmacnum%1000+6214|| prenid==randmacnum%1000+6179|| prenid==randmacnum%1000+6151|| prenid==randmacnum%1000+6140|| prenid==randmacnum%1000+6124|| prenid==randmacnum%1000+6028|| prenid==randmacnum%1000+5982|| prenid==randmacnum%1000+5938|| prenid==randmacnum%1000+5927|| prenid==randmacnum%1000+5895|| prenid==randmacnum%1000+5873|| prenid==randmacnum%1000+5863|| prenid==randmacnum%1000+5852|| prenid==randmacnum%1000+5822|| prenid==randmacnum%1000+5790|| prenid==randmacnum%1000+5774|| prenid==randmacnum%1000+5728|| prenid==randmacnum%1000+5717|| prenid==randmacnum%1000+5701|| prenid==randmacnum%1000+5330|| prenid==randmacnum%1000+5318|| prenid==randmacnum%1000+5292|| prenid==randmacnum%1000+5246|| prenid==randmacnum%1000+5188|| prenid==randmacnum%1000+5150|| prenid==randmacnum%1000+5129|| prenid==randmacnum%10+1734|| prenid==randmacnum%10+1733|| prenid==randmacnum%10+1732|| prenid==randmacnum%10+1741|| prenid==randmacnum%100+3620|| prenid==randmacnum%100+3617|| prenid==randmacnum%100+3599|| prenid==randmacnum%100+3577|| prenid==randmacnum%100+3371|| prenid==randmacnum%100+3333|| prenid==randmacnum%100+3324|| prenid==randmacnum%100+3321|| prenid==randmacnum%100+3314|| prenid==randmacnum%100+3301|| prenid==randmacnum%100+3268|| prenid==randmacnum%100+3265|| prenid==randmacnum%100+3256|| prenid==randmacnum%100+3420|| prenid==randmacnum%100+3243|| prenid==randmacnum%100+3237|| prenid==randmacnum%100+3227|| prenid==randmacnum%100+3199||    prenid==randmacnum%10000+7536|| prenid==randmacnum%10000+7536|| prenid==randmacnum%10000+8671|| prenid==randmacnum%10000+8671|| prenid==randmacnum%10000+13252|| prenid==randmacnum%10000+12897|| prenid==randmacnum%1000+9566|| prenid==randmacnum%10+1762|| prenid==randmacnum%10000+9703|| prenid==randmacnum%10000+10195|| prenid==randmacnum%10000+8421|| prenid==randmacnum%10000+11303|| prenid==randmacnum%10000+13904|| prenid==randmacnum%10000+10199|| prenid==randmacnum%10000+11409|| prenid==randmacnum%10000+11408|| prenid==randmacnum%10000+11262|| prenid==randmacnum%10000+11275|| prenid==randmacnum%10000+11264|| prenid==randmacnum%10000+11261|| prenid==randmacnum%10000+11263|| prenid==randmacnum%10000+11257|| prenid==randmacnum%10000+11268|| prenid==randmacnum%10000+8983|| prenid==randmacnum%10000+13838|| prenid==randmacnum%10000+13842|| prenid==randmacnum%10000+13594|| prenid==randmacnum%10000+13595|| prenid==randmacnum%10000+13533|| prenid==randmacnum%10000+13460|| prenid==randmacnum%10000+11225|| prenid==randmacnum%10000+11234|| prenid==randmacnum%10000+13903|| prenid==randmacnum%10000+13938||strstr(inodepatchstr,prenidstr)){
+
+                                             //not special
+
+
+
+                            }
+                            else{
+
+                                      i=ii;
+                                       break;
+
+                            }
+
+
+                      }
+
+
+
+		}
+		kfree(prenidstr);
+              //}
+
+                if(findino==0&&*nid!=0){
+
+                    //printk(KERN_INFO "special nofind f2fs_alloc_nidold  %d \n",*nid);
+                }
+
+//e
+
+
 		*nid = i->nid;
 
 		__move_free_nid(sbi, i, FREE_NID, PREALLOC_NID);
@@ -3264,6 +3334,12 @@ static int init_node_manager(struct f2fs_sb_info *sbi)
 	init_f2fs_rwsem(&nm_i->nat_tree_lock);
 
 	nm_i->next_scan_nid = le32_to_cpu(sbi->ckpt->next_free_nid);
+//s
+//s
+
+	 nm_i->next_scan_nid=1733;
+//e
+//e
 	nm_i->bitmap_size = __bitmap_size(sbi, NAT_BITMAP);
 	version_bitmap = __bitmap_ptr(sbi, NAT_BITMAP);
 	nm_i->nat_bitmap = kmemdup(version_bitmap, nm_i->bitmap_size,
