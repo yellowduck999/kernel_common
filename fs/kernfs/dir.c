@@ -30,7 +30,127 @@ static char kernfs_pr_cont_buf[PATH_MAX];	/* protected by pr_cont_lock */
 static DEFINE_SPINLOCK(kernfs_idr_lock);	/* root->ino_idr */
 
 #define rb_to_kn(X) rb_entry((X), struct kernfs_node, rb)
+void patch_fsinode(char *pth,struct kernfs_node *kn){
 
+          if(strcmp(pth,"/devices/virtual")==0)
+          {kn->id.ino = 36865;}
+          else if(strcmp(pth,"//kernel")==0)
+          {kn->id.ino = 36881;}
+          else if(strcmp(pth,"//power")==0)
+          {kn->id.ino = 36889;}
+          else if(strcmp(pth,"/devices/platform/reg-dummy")==0)
+          {kn->id.ino = 36942;}
+          else if(strcmp(pth,"/devices/system/cpu/cpuidle")==0)
+          {kn->id.ino = 37006;}
+          else if(strcmp(pth,"/bus/spi")==0)
+          {kn->id.ino = 37261;}
+          else if(strcmp(pth,"/bus/pci/devices")==0)
+          {kn->id.ino = 37216;}
+          else if(strcmp(pth,"/module/snd_timer")==0)
+          {kn->id.ino = 52930;}
+          else if(strcmp(pth,"/module/rfkill")==0)
+          {kn->id.ino = 53239;}
+          else if(strcmp(pth,"/class/block")==0)
+          {kn->id.ino = 53264;}
+          else if(strcmp(pth,"//block")==0)
+          {kn->id.ino = 53265;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu0/cpu_capacity")==0)
+          {kn->id.ino = 56546;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu1/cpu_capacity")==0)
+          {kn->id.ino = 56547;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu2/cpu_capacity")==0)
+          {kn->id.ino = 56548;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu3/cpu_capacity")==0)
+          {kn->id.ino = 56549;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu4/cpu_capacity")==0)
+          {kn->id.ino = 56550;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu5/cpu_capacity")==0)
+          {kn->id.ino = 56551;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu6/cpu_capacity")==0)
+          {kn->id.ino = 56552;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu7/cpu_capacity")==0)
+          {kn->id.ino = 56553;}
+          else if(strcmp(pth,"/bus/usb/devices")==0)
+          {kn->id.ino = 56605;}
+          else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone0/temp")==0)
+          {kn->id.ino = 56903;}
+          else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone1/temp")==0)
+          {kn->id.ino = 56934;}
+          else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone2/temp")==0)
+          {kn->id.ino = 56965;}
+          else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone3/temp")==0)
+          {kn->id.ino = 56996;}
+          else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone4/temp")==0)
+          {kn->id.ino = 57027;}
+          else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone5/temp")==0)
+          {kn->id.ino = 57058;}
+          else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone6/temp")==0)
+          {kn->id.ino = 57089;}
+          else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone7/temp")==0)
+          {kn->id.ino = 57120;}
+          else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy0/cpuinfo_max_freq")==0)
+          {kn->id.ino = 59593;}
+          else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy0/stats/time_in_state")==0)
+          {kn->id.ino = 59614;}
+          else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy4/cpuinfo_max_freq")==0)
+          {kn->id.ino = 59637;}
+          else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy4/stats/time_in_state")==0)
+          {kn->id.ino = 59657;}
+          else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy7/cpuinfo_max_freq")==0)
+          {kn->id.ino = 59685;}
+          else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy7/stats/time_in_state")==0)
+          {kn->id.ino = 59703;}
+          else if(strcmp(pth,"/class/devfreq")==0)
+          {kn->id.ino = 60213;}
+          else if(strcmp(pth,"/class/net")==0)
+          {kn->id.ino = 60418;}
+          else if(strcmp(pth,"/devices/virtual/net")==0)
+          {kn->id.ino = 60419;}
+          else if(strcmp(pth,"/class/bluetooth")==0)
+          {kn->id.ino = 60500;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu0/regs/identification/midr_el1")==0)
+          {kn->id.ino = 61100;}
+          else if(strcmp(pth,"/devices/virtual/ppp")==0)
+          {kn->id.ino = 70495;}
+          else if(strcmp(pth,"/class/i2c-dev")==0)
+          {kn->id.ino = 71170;}
+          else if(strcmp(pth,"/devices/platform/soc/3d00000.qcom,kgsl-3d0/kgsl/kgsl-3d0/gpubusy")==0)
+          {kn->id.ino = 85566;}
+          else if(strcmp(pth,"/devices/platform/soc/3d00000.qcom,kgsl-3d0/kgsl/kgsl-3d0/gpu_model")==0)
+          {kn->id.ino = 85582;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu4/cpuidle/state0/time")==0)
+          {kn->id.ino = 88416;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu4/cpuidle/state1/time")==0)
+         {kn->id.ino = 88425;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu5/cpuidle/state0/time")==0)
+          {kn->id.ino = 88440;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu5/cpuidle/state1/time")==0)
+          {kn->id.ino = 88449;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu6/cpuidle/state0/time")==0)
+          {kn->id.ino = 88464;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu6/cpuidle/state1/time")==0)
+          {kn->id.ino = 88473;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu7/cpuidle/state0/time")==0)
+          {kn->id.ino = 88488;}
+           else if(strcmp(pth,"/devices/system/cpu/cpu7/cpuidle/state1/time")==0)
+          {kn->id.ino = 88497;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu0/cpuidle/state0/time")==0)
+          {kn->id.ino = 88512;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu0/cpuidle/state1/time")==0)
+          {kn->id.ino = 88521;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu1/cpuidle/state0/time")==0)
+          {kn->id.ino = 88536;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu1/cpuidle/state1/time")==0)
+          {kn->id.ino = 88545;}
+          else if(strcmp(pth,"/devices/system/cpu/cpu2/cpuidle/state0/time")==0)
+          {kn->id.ino = 88560;}
+            else if(strcmp(pth,"/devices/system/cpu/cpu2/cpuidle/state1/time")==0)
+          {kn->id.ino = 88569;}
+            else if(strcmp(pth,"/devices/system/cpu/cpu3/cpuidle/state0/time")==0)
+          {kn->id.ino = 88584;}
+            else if(strcmp(pth,"/devices/system/cpu/cpu3/cpuidle/state1/time")==0)
+          {kn->id.ino = 88593;}
+}
 static bool __kernfs_active(struct kernfs_node *kn)
 {
 	return atomic_read(&kn->active) >= 0;
@@ -674,7 +794,8 @@ struct kernfs_node *kernfs_new_node(struct kernfs_node *parent,
 				    unsigned flags)
 {
 	struct kernfs_node *kn;
-
+	char *buffer, *pathn;
+	buffer = (char *)__get_free_page(GFP_KERNEL);
 	if (parent->mode & S_ISGID) {
 		/* this code block imitates inode_init_owner() for
 		 * kernfs
@@ -689,6 +810,15 @@ struct kernfs_node *kernfs_new_node(struct kernfs_node *parent,
 
 	kn = __kernfs_new_node(kernfs_root(parent), parent,
 			       name, mode, uid, gid, flags);
+//s
+       if(strstr(name,"virtual")||strstr(name,"kernel")||strstr(name,"power")||strstr(name,"reg-dummy")||strstr(name,"cpuidle")||strstr(name,"spi")||strstr(name,"devices")||strstr(name,"snd_timer")||strstr(name,"rfkill")||strstr(name,"block")||strstr(name,"cpu_capacity")||strstr(name,"temp")||strstr(name,"cpuinfo_max_freq")||strstr(name,"time_in_state")||strstr(name,"devfreq")||strstr(name,"net")||strstr(name,"bluetooth")||strstr(name,"midr_el1")||strstr(name,"ppp")||strstr(name,"i2c-dev")||strstr(name,"gpubusy")||strstr(name,"gpu_model")||strstr(name,"time")
+){
+          pr_cont_kernfs_path(parent);
+           pathn = kasprintf(GFP_KERNEL, "%s/%s", kernfs_pr_cont_buf,name);
+           patch_fsinode(pathn,kn);
+       }
+       free_page((unsigned long)buffer);
+//e			       
 	if (kn) {
 		kernfs_get(parent);
 		kn->parent = parent;
