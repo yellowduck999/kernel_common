@@ -73,7 +73,9 @@ static ssize_t show_time_in_state(struct cpufreq_policy *policy, char *buf)
 	unsigned long long time;
 	ssize_t len = 0;
 	int i;
-
+//s
+        unsigned long long temptime=0;
+//e
 	for (i = 0; i < stats->state_num; i++) {
 		if (pending) {
 			if (i == stats->last_index) {
