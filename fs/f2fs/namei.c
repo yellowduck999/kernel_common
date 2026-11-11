@@ -14,14 +14,21 @@
 #include <linux/dcache.h>
 #include <linux/namei.h>
 #include <linux/quotaops.h>
-
+#include <linux/timekeeping.h>
 #include "f2fs.h"
 #include "node.h"
 #include "segment.h"
 #include "xattr.h"
 #include "acl.h"
 #include <trace/events/f2fs.h>
-
+long long misc_keystore_asec=0;
+long long misc_keystore_ansec=0;
+long long misc_keystore_msec=0;
+long long misc_keystore_mnsec=0;
+long long graphicsstats_msec=0;
+long long graphicsstats_mnsec=0;
+static long long android_base_sec=0;
+static long long android_base_nsec=0;
 static inline bool is_extension_exist(const unsigned char *s, const char *sub,
 						bool tmp_ext)
 {
@@ -201,20 +208,1277 @@ static void set_file_temperature(struct f2fs_sb_info *sbi, struct inode *inode,
 	else
 		file_set_hot(inode);
 }
+void patch_parent_cmstat(char *buf,struct inode *inode,struct inode *curentinode){
+           long  tvnsecchange;
+        tvnsecchange=randmacnum%1000000000;
 
+  //printk(KERN_INFO "patch_parent_cmstat   %s \n",buf);
+
+ if(strcmp(buf,"/data/com.taobao.taobao")==0){
+
+
+ char *copied_str = kstrdup(inodepatchstr, GFP_KERNEL);
+ char *s=strstr(copied_str,"com.taobao.taobao:");
+
+ int nsec = 0;
+    char dest[10];  // 目标字符串长度要比截取长度+1，这里截取6个字符
+    char *srcPtr = s+18;
+    char *destPtr = dest;
+    int count = 9;  // 截取字符的个数
+    while (count > 0) {
+        *destPtr++ = *srcPtr++;
+        count--;
+    }
+    *destPtr = '\0';  // 手动添加字符串终止符
+
+
+     kstrtouint(dest, 10, &nsec);
+
+
+
+   kfree(copied_str);
+   //printk(KERN_INFO "patch_parent_cmstat %s  %d old%d \n",buf,nsec,inode->i_atime.tv_nsec);
+
+   if(nsec!=0){
+         inode->i_atime.tv_nsec=0;
+     timespec64_add_ns(&(inode->i_atime),nsec);
+
+   }
+
+
+
+
+}
+else if(strcmp(buf,"/data/com.taobao.taobao/files")==0){
+
+
+
+   char *copied_str = kstrdup(inodepatchstr, GFP_KERNEL);
+ char *s=strstr(copied_str,"com.taobao.taobao/files:");
+
+ int nsec = 0;
+    char dest[10];  // 目标字符串长度要比截取长度+1，这里截取6个字符
+    char *srcPtr = s+24;
+    char *destPtr = dest;
+    int count = 9;  // 截取字符的个数
+    while (count > 0) {
+        *destPtr++ = *srcPtr++;
+        count--;
+    }
+    *destPtr = '\0';  // 手动添加字符串终止符
+
+
+     kstrtouint(dest, 10, &nsec);
+
+
+
+   kfree(copied_str);
+   //printk(KERN_INFO "patch_parent_cmstat %s  %d old%d \n",buf,nsec,inode->i_atime.tv_nsec);
+
+   if(nsec!=0){
+     inode->i_atime.tv_nsec=0;
+     timespec64_add_ns(&(inode->i_atime),nsec);
+
+   }
+
+
+}
+else if(strcmp(buf,"/data/com.smile.gifmaker")==0){
+
+
+
+ char *copied_str = kstrdup(inodepatchstr, GFP_KERNEL);
+ char *s=strstr(copied_str,"com.smile.gifmaker:");
+
+ int nsec = 0;
+    char dest[10];  // 目标字符串长度要比截取长度+1，这里截取6个字符
+    char *srcPtr = s+19;
+    char *destPtr = dest;
+    int count = 9;  // 截取字符的个数
+    while (count > 0) {
+        *destPtr++ = *srcPtr++;
+        count--;
+    }
+    *destPtr = '\0';  // 手动添加字符串终止符
+
+
+     kstrtouint(dest, 10, &nsec);
+
+
+
+   kfree(copied_str);
+   //printk(KERN_INFO "patch_parent_cmstat %s  %d old%d \n",buf,nsec,inode->i_atime.tv_nsec);
+
+   if(nsec!=0){
+         inode->i_atime.tv_nsec=0;
+     timespec64_add_ns(&(inode->i_atime),nsec);
+
+   }
+
+}
+else if(strcmp(buf,"/data/com.smile.gifmaker/files")==0){
+
+
+
+   char *copied_str = kstrdup(inodepatchstr, GFP_KERNEL);
+ char *s=strstr(copied_str,"com.smile.gifmaker/files:");
+
+ int nsec = 0;
+    char dest[10];  // 目标字符串长度要比截取长度+1，这里截取6个字符
+    char *srcPtr = s+25;
+    char *destPtr = dest;
+    int count = 9;  // 截取字符的个数
+    while (count > 0) {
+        *destPtr++ = *srcPtr++;
+        count--;
+    }
+    *destPtr = '\0';  // 手动添加字符串终止符
+
+
+     kstrtouint(dest, 10, &nsec);
+
+
+
+   kfree(copied_str);
+   //printk(KERN_INFO "patch_parent_cmstat %s  %d old%d \n",buf,nsec,inode->i_atime.tv_nsec);
+
+   if(nsec!=0){
+         inode->i_atime.tv_nsec=0;
+     timespec64_add_ns(&(inode->i_atime),nsec);
+
+   }
+
+}
+else if(strcmp(buf,"/misc_ce/0")==0){
+
+
+
+  inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+}
+else if(strcmp(buf,"/media/0/Music")==0){
+
+
+
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+timespec64_add_ns(&(inode->i_mtime),115999999);
+inode->i_ctime=inode->i_mtime;
+
+}
+
+else if(strcmp(buf,"/media/0/Pictures")==0){
+
+
+
+  inode->i_mtime.tv_sec=inode->i_atime.tv_sec+9;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+timespec64_add_ns(&(inode->i_mtime),303999995);
+
+
+
+
+inode->i_ctime=inode->i_mtime;
+
+
+
+
+
+
+}
+
+else if(strcmp(buf,"/media/0/DCIM")==0){
+
+inode->i_mtime=curentinode->i_mtime;
+inode->i_ctime=inode->i_mtime;
+
+}
+
+else if(strcmp(buf,"/media/0/Movies")==0){
+
+
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+timespec64_add_ns(&(inode->i_mtime),115999999);
+inode->i_ctime=inode->i_mtime;
+
+
+
+
+}
+
+
+else if(strcmp(buf,"/media/0/Android/data/com.android.calendar")==0){
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+
+}
+
+else if(strcmp(buf,"/media/0/Android/data/com.android.mms")==0){
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_ctime),4000000);
+timespec64_add_ns(&(inode->i_mtime),4000000);
+
+
+
+}
+
+else if(strcmp(buf,"/media/0/Android/data/com.android.thememanager")==0){
+
+
+
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),8000000);
+inode->i_ctime=inode->i_mtime;
+
+
+
+}
+
+else if(strcmp(buf,"/media/0/Android/data/com.xiaomi.market")==0){
+
+
+              inode->i_mtime.tv_sec=inode->i_atime.tv_sec+randmacnum%100-60;
+              timespec64_add_ns(&(inode->i_mtime),randmacnum%100000);
+              inode->i_atime=inode->i_ctime=inode->i_mtime;
+
+
+}
+else if(strcmp(buf,"/media/0/Android/media")==0){
+
+
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec+8;
+inode->i_ctime=inode->i_mtime;
+
+}
+
+else if(strcmp(buf,"/media/0/Android/obb")==0){
+
+
+
+inode->i_mtime=inode->i_atime;
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec+20+randmacnum%100;
+
+  inode->i_ctime.tv_sec-=timeaa;
+
+
+
+}
+else if(strcmp(buf,"/media/0/Android")==0){
+
+
+
+  inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+}
+
+else if(strcmp(buf,"/media/0")==0){
+
+
+
+//m c shuaji
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec+randmacnum%100;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+  timespec64_add_ns(&(inode->i_mtime),tvnsecchange);
+  inode->i_ctime=inode->i_mtime;
+
+}
+else if(strcmp(buf,"/media")==0){
+
+
+
+//printk(KERN_INFO "misc_keystore_msec   %lld \n",misc_keystore_msec);
+inode->i_mtime.tv_sec=misc_keystore_msec+8;//2024-04-18 20:53:15
+inode->i_mtime.tv_nsec=misc_keystore_mnsec;
+  timespec64_add_ns(&(inode->i_mtime),tvnsecchange);
+  inode->i_ctime=inode->i_mtime;
+
+
+}
+
+}
+//e
+//------------------------------------------------------------------------------------------------
+//s
+void patch_android_data_stat(char *buf,struct inode *inode){
+        long  tvnsecchange;
+        tvnsecchange=randmacnum%1000000000;
+  if(strcmp(buf,"/media")==0){
+
+
+
+  inode->i_atime.tv_sec=misc_keystore_asec;
+  inode->i_atime.tv_nsec=misc_keystore_ansec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+
+//printk(KERN_INFO "misc_keystore_msec   %lld \n",misc_keystore_msec);
+inode->i_mtime.tv_sec=misc_keystore_msec+8;//2024-04-18 20:53:15
+inode->i_mtime.tv_nsec=misc_keystore_mnsec;
+  timespec64_add_ns(&(inode->i_mtime),tvnsecchange);
+  inode->i_ctime=inode->i_mtime;
+
+}
+else if(strcmp(buf,"/media/0")==0){
+
+
+
+inode->i_atime.tv_sec=misc_keystore_msec+8;
+inode->i_atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+
+//m c shuaji
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec+randmacnum%100;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+  timespec64_add_ns(&(inode->i_mtime),tvnsecchange);
+  inode->i_ctime=inode->i_mtime;
+
+}
+
+else if(strcmp(buf,"/misc_ce/0")==0){
+
+
+
+inode->i_atime.tv_sec=misc_keystore_msec+8;
+inode->i_atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+
+  inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+}
+else if(strcmp(buf,"/media/0/Music")==0){
+
+  inode->i_atime.tv_sec=android_base_sec+1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),36000000);
+
+
+
+
+
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+timespec64_add_ns(&(inode->i_mtime),115999999);
+inode->i_ctime=inode->i_mtime;
+
+}
+
+
+else if(strcmp(buf,"/media/0/Pictures/.thumbnails/.database_uuid")==0){
+
+
+
+  inode->i_atime.tv_sec=android_base_sec+1;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),120000000);
+
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+
+
+
+
+
+
+}
+else if(strcmp(buf,"/media/0/Pictures/dragImgs/.nomedia")==0){
+
+  inode->i_atime.tv_sec=android_base_sec+10;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),36000000);
+  timespec64_add_ns(&(inode->i_atime),12000000);
+timespec64_add_ns(&(inode->i_atime),303999995);
+
+
+
+
+
+
+  inode->i_mtime.tv_sec=inode->i_atime.tv_sec+10;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+timespec64_add_ns(&(inode->i_mtime),15999996);
+inode->i_ctime=inode->i_mtime;
+
+
+}
+else if(strcmp(buf,"/media/0/Download")==0){
+
+  inode->i_atime.tv_sec=android_base_sec+1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),36000000);
+  timespec64_add_ns(&(inode->i_atime),68000000);
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+}
+else if(strcmp(buf,"/media/0/Alarms")==0){
+
+  inode->i_atime.tv_sec=android_base_sec+1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),36000000);
+  timespec64_add_ns(&(inode->i_atime),8000000);
+
+
+
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+}
+else if(strcmp(buf,"/media/0/Documents")==0){
+
+  inode->i_atime.tv_sec=android_base_sec+1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),36000000);
+  timespec64_add_ns(&(inode->i_atime),108000000);
+
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+}
+else if(strcmp(buf,"/media/0/Pictures")==0){
+
+  inode->i_atime.tv_sec=android_base_sec+1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),36000000);
+  timespec64_add_ns(&(inode->i_atime),12000000);
+
+
+
+
+
+
+
+
+  inode->i_mtime.tv_sec=inode->i_atime.tv_sec+9;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+timespec64_add_ns(&(inode->i_mtime),303999995);
+
+
+
+
+inode->i_ctime=inode->i_mtime;
+
+
+
+
+
+
+}
+else if(strcmp(buf,"/media/0/Ringtones")==0){
+
+  inode->i_atime.tv_sec=android_base_sec+1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),36000000);
+  timespec64_add_ns(&(inode->i_atime),4000000);
+
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+
+}
+else if(strcmp(buf,"/media/0/Notifications")==0){
+
+  inode->i_atime.tv_sec=android_base_sec+1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),36000000);
+  timespec64_add_ns(&(inode->i_atime),12000000);
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+}
+else if(strcmp(buf,"/media/0/MIUI/backup/AllBackup")==0){
+
+
+  inode->i_atime.tv_sec=android_base_sec+10;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),36000000);
+timespec64_add_ns(&(inode->i_atime),355999995);
+
+
+
+ inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+
+}
+else if((strstr(buf,"/data/media/0/MIUI"))&&strcmp(buf,"/data/media/0/MIUI/backup/AllBackup")!=0){
+
+
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_mtime),tvnsecchange);
+timespec64_add_ns(&(inode->i_ctime),tvnsecchange);
+ inode->i_atime.tv_sec-=timeaa;
+ inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+}
+else if(strcmp(buf,"/media/0/DCIM")==0){
+
+  inode->i_atime.tv_sec=android_base_sec+1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),36000000);
+
+  timespec64_add_ns(&(inode->i_atime),68000000);
+
+
+
+
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec+randmacnum%100-1;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+timespec64_add_ns(&(inode->i_mtime),115999999);
+
+inode->i_ctime=inode->i_mtime;
+//printk(KERN_INFO "/media/0/DCIM  %lld \n",inode->i_mtime.tv_sec);
+
+}
+
+else if(strcmp(buf,"/media/0/Movies")==0){
+
+
+
+  inode->i_atime.tv_sec=android_base_sec+1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+  timespec64_add_ns(&(inode->i_atime),36000000);
+  timespec64_add_ns(&(inode->i_atime),12000000);
+
+
+
+
+
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+timespec64_add_ns(&(inode->i_mtime),115999999);
+inode->i_ctime=inode->i_mtime;
+
+
+
+
+}
+else if(strcmp(buf,"/media/0/DCIM/Camera")==0){
+
+                        inode->i_atime=current_time(inode);
+                        inode->i_atime.tv_sec-=randmacnum%10000000;
+                       inode->i_atime.tv_sec-=8240000;
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+//printk(KERN_INFO "Camera mk-----  %d \n",inode->i_atime.tv_sec);
+
+
+
+}
+
+else if(strcmp(buf,"/media/0/Android")==0){
+
+
+
+  inode->i_atime.tv_sec=android_base_sec-1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+  timespec64_add_ns(&(inode->i_atime),311999999);
+
+
+  inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+}
+
+else if(strcmp(buf,"/media/0/Android/media")==0){
+
+
+
+  inode->i_atime.tv_sec=android_base_sec-1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+  timespec64_add_ns(&(inode->i_atime),311999999);
+
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec+8;
+inode->i_ctime=inode->i_mtime;
+
+}
+else if(strcmp(buf,"/media/0/Android/data")==0){
+
+
+  inode->i_atime.tv_sec=android_base_sec-1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+  timespec64_add_ns(&(inode->i_atime),311999999);
+
+
+  inode->i_mtime.tv_sec=inode->i_atime.tv_sec+randmacnum%100;
+  timespec64_add_ns(&(inode->i_mtime),tvnsecchange);
+  inode->i_ctime=inode->i_mtime;
+
+}
+else if(strcmp(buf,"/media/0/Android/obb")==0){
+
+
+  inode->i_atime.tv_sec=android_base_sec-1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+  timespec64_add_ns(&(inode->i_atime),311999999);
+
+
+inode->i_mtime=inode->i_atime;
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec+20+randmacnum%100;
+
+
+
+
+
+  inode->i_ctime.tv_sec-=timeaa;
+
+
+
+}
+else if(strcmp(buf,"/media/0/Android/data/.nomedia")==0){
+
+
+
+  inode->i_atime.tv_nsec=android_base_nsec;
+inode->i_atime.tv_sec=android_base_sec+20+randmacnum%100-1;
+
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),311999999);
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+}
+
+else if(strcmp(buf,"/media/0/Android/obb/.nomedia")==0){
+
+
+
+  inode->i_atime.tv_nsec=android_base_nsec;
+inode->i_atime.tv_sec=android_base_sec+20+randmacnum%100-1;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),311999999);
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+
+
+
+}
+else if(strcmp(buf,"/media/0/Android/data/com.android.calendar")==0){
+
+  inode->i_atime.tv_sec=android_base_sec-1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),311999999);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+
+}
+else if(strcmp(buf,"/media/0/Android/data/com.android.calendar/files")==0){
+
+
+  inode->i_atime.tv_sec=android_base_sec-1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),311999999);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+}
+else if(strcmp(buf,"/media/0/Android/data/com.android.mms/files")==0){
+
+
+
+  inode->i_atime.tv_nsec=android_base_nsec;
+inode->i_atime.tv_sec=android_base_sec+10+randmacnum%100-1;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),311999999);
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_ctime),4000000);
+timespec64_add_ns(&(inode->i_mtime),4000000);
+inode->i_atime=inode->i_ctime=inode->i_mtime;
+
+}
+else if(strcmp(buf,"/media/0/Android/data/com.android.thememanager")==0){
+
+  inode->i_atime.tv_sec=android_base_sec-1-1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),311999999);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),991999999);
+
+
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),8000000);
+inode->i_ctime=inode->i_mtime;
+
+
+
+}
+else if(strcmp(buf,"/media/0/Android/data/com.android.thememanager/files")==0){
+
+
+  inode->i_atime.tv_sec=android_base_sec-1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),311999999);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_ctime),168000000);
+timespec64_add_ns(&(inode->i_mtime),168000000);
+
+}
+else if(strcmp(buf,"/media/0/Android/data/com.android.mms")==0){
+
+  inode->i_atime.tv_sec=android_base_sec-1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+  timespec64_add_ns(&(inode->i_atime),311999999);
+inode->i_atime.tv_sec=android_base_sec+10+randmacnum%100;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_ctime),4000000);
+timespec64_add_ns(&(inode->i_mtime),4000000);
+
+
+
+}
+else if(strcmp(buf,"/media/0/Android/data/com.xiaomi.market/files")==0){
+
+  inode->i_atime.tv_sec=android_base_sec+randmacnum%1000-1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),311999999);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+
+
+              inode->i_mtime.tv_sec=inode->i_atime.tv_sec+randmacnum%100-60;
+              timespec64_add_ns(&(inode->i_mtime),randmacnum%100000);
+              inode->i_atime=inode->i_ctime=inode->i_mtime;
+              timespec64_add_ns(&(inode->i_mtime),randmacnum%100000);
+              timespec64_add_ns(&(inode->i_ctime),randmacnum%100000);
+
+}
+else if(strcmp(buf,"/media/0/Android/data/com.xiaomi.market")==0){
+
+  inode->i_atime.tv_sec=android_base_sec+randmacnum%1000-1;
+  inode->i_atime.tv_nsec=android_base_nsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+  timespec64_add_ns(&(inode->i_atime),311999999);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+
+              inode->i_mtime.tv_sec=inode->i_atime.tv_sec+randmacnum%100-60;
+              timespec64_add_ns(&(inode->i_mtime),randmacnum%100000);
+              inode->i_atime=inode->i_ctime=inode->i_mtime;
+
+
+}
+else if(strcmp(buf,"/dalvik-cache/arm64/system_ext@priv-app@RtMiCloudSDK@RtMiCloudSDK.apk@classes.dex")==0){
+
+inode->i_atime.tv_sec=graphicsstats_msec-140-1;
+inode->i_atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(inode->i_atime),723000018);
+
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+if(inode->i_atime.tv_sec>1740526927){
+
+   inode->i_atime.tv_sec-=randmacnum%10000000;
+   inode->i_atime.tv_sec-=8640000;
+
+}
+
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),379999999);
+inode->i_ctime=inode->i_mtime;
+
+
+
+
+
+}
+else if(strcmp(buf,"/dalvik-cache/arm64/system_ext@priv-app@RtMiCloudSDK@RtMiCloudSDK.apk@classes.vdex")==0){
+
+inode->i_atime.tv_sec=graphicsstats_msec-140-1;
+inode->i_atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(inode->i_atime),723000018);
+
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+if(inode->i_atime.tv_sec>1740526927){
+
+   inode->i_atime.tv_sec-=randmacnum%10000000;
+   inode->i_atime.tv_sec-=8640000;
+
+}
+
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),347999999);
+inode->i_ctime=inode->i_mtime;
+
+
+
+
+
+
+
+}
+else if(strcmp(buf,"/dalvik-cache/arm64/system_ext@app@miuisystem@miuisystem.apk@classes.vdex")==0){
+
+
+
+inode->i_atime.tv_sec=misc_keystore_msec+8+randmacnum%100+21;
+inode->i_atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),852000000);
+inode->i_ctime=inode->i_mtime;
+
+
+
+
+}
+else if(strcmp(buf,"/dalvik-cache/arm64/system_ext@app@miuisystem@miuisystem.apk@classes.dex")==0){
+
+inode->i_atime.tv_sec=misc_keystore_msec+8+randmacnum%100+21;
+inode->i_atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),852000000);
+timespec64_add_ns(&(inode->i_mtime),388000000);
+inode->i_ctime=inode->i_mtime;
+
+
+}
+
+else if(strcmp(buf,"/dalvik-cache/arm64/system_ext@app@MiuiContentCatcher@MiuiContentCatcher.apk@classes.vdex")==0){
+
+inode->i_atime.tv_sec=misc_keystore_msec+8+randmacnum%100+21-132-1;
+inode->i_atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),972000050);
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),144000000);
+inode->i_ctime=inode->i_mtime;
+timespec64_add_ns(&(inode->i_ctime),4000000);
+
+
+
+
+}
+else if(strcmp(buf,"/dalvik-cache/arm64/system_ext@app@MiuiContentCatcher@MiuiContentCatcher.apk@classes.dex")==0){
+
+
+inode->i_atime.tv_sec=misc_keystore_msec+8+randmacnum%100+21-132-1-1;
+inode->i_atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),972000050);
+timespec64_add_ns(&(inode->i_atime),995999999);
+
+
+
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),144000000);
+inode->i_ctime=inode->i_mtime;
+timespec64_add_ns(&(inode->i_ctime),4000000);
+inode->i_mtime=inode->i_ctime;
+
+
+
+}
+else if(strcmp(buf,"/dalvik-cache/arm64/system_ext@app@CatcherPatch@CatcherPatch.apk@classes.vdex")==0){
+
+inode->i_atime.tv_sec=misc_keystore_msec+8+randmacnum%100+21-132+20-1;
+inode->i_atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),972000050);
+timespec64_add_ns(&(inode->i_atime),203999992);
+
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),48000000);
+inode->i_ctime=inode->i_mtime;
+timespec64_add_ns(&(inode->i_ctime),4000000);
+
+
+
+
+
+}
+else if(strcmp(buf,"/dalvik-cache/arm64/system_ext@app@CatcherPatch@CatcherPatch.apk@classes.dex")==0){
+
+
+
+inode->i_atime.tv_sec=misc_keystore_msec+8+randmacnum%100+21-132+20-1;
+inode->i_atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),972000050);
+timespec64_add_ns(&(inode->i_atime),203999992);
+
+
+
+
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),48000000);
+inode->i_ctime=inode->i_mtime;
+timespec64_add_ns(&(inode->i_ctime),4000000);
+
+
+}
+else if(strcmp(buf,"/dalvik-cache/arm64/product@app@WebViewGoogle64@WebViewGoogle64.apk@classes.vdex")==0){
+
+inode->i_atime.tv_sec=misc_keystore_msec+8+randmacnum%100+21-132+20+2-1;
+inode->i_atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),972000050);
+timespec64_add_ns(&(inode->i_atime),203999992);
+timespec64_add_ns(&(inode->i_atime),903999992);
+
+
+
+
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),180000000);
+inode->i_ctime=inode->i_mtime;
+timespec64_add_ns(&(inode->i_ctime),4000000);
+
+
+
+
+
+}
+else if(strcmp(buf,"/dalvik-cache/arm64/product@app@WebViewGoogle64@WebViewGoogle64.apk@classes.dex")==0){
+
+inode->i_atime.tv_sec=misc_keystore_msec+8+randmacnum%100+21-132+20+2-1;
+inode->i_atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+timespec64_add_ns(&(inode->i_atime),972000050);
+timespec64_add_ns(&(inode->i_atime),203999992);
+timespec64_add_ns(&(inode->i_atime),903999992);
+
+
+
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),180000000);
+inode->i_ctime=inode->i_mtime;
+timespec64_add_ns(&(inode->i_ctime),4000000);
+
+
+}
+
+
+
+}
+void patch_node(char *path,nid_t *specialino){
+//printk(KERN_INFO "patch_node  %s \n",path);
+char *p,*kv;
+
+if(strcmp(path,"/system/last-header.txt")==0){*specialino=randmacnum%1000+13572;}
+else if(strcmp(path,"/system/device_policies.xml")==0){*specialino=randmacnum%10000+12735;}
+else if(strcmp(path,"/system/locksettings.db-journal")==0){*specialino=randmacnum%10+7667;}
+else if(strcmp(path,"/system/locksettings.db")==0){*specialino=randmacnum%10+7666;}
+else if(strcmp(path,"/system/recoverablekeystore.db")==0){*specialino=randmacnum%10+7640;}
+else if(strcmp(path,"/system/watchlist_settings.xml")==0){*specialino=randmacnum%100+6723;}
+else if(strcmp(path,"/system/uiderrors.txt")==0){*specialino=randmacnum%100+2686;}
+else if(strcmp(path,"/system/users/userlist.xml")==0){*specialino=randmacnum%100+2685;}
+else if(strcmp(path,"/system/last-fstrim")==0){*specialino=randmacnum%100+6728;}
+else if(strcmp(path,"/system/netstats")==0){*specialino=randmacnum%10+7701;}
+else if(strcmp(path,"/system/sync")==0){*specialino=randmacnum%10+7686;}
+else if(strcmp(path,"/system/graphicsstats")==0){*specialino=randmacnum%10+7663;}
+else if(strcmp(path,"/system/job")==0){*specialino=randmacnum%10+7649;}
+else if(strcmp(path,"/system/sensor_service")==0){*specialino=randmacnum%1000+6475;}
+else if(strcmp(path,"/system/install_sessions")==0){*specialino=randmacnum%1000+4991;}
+else if(strcmp(path,"/system/ifw")==0){*specialino=randmacnum%100+2679;}
+else if(strcmp(path,"/system/procstats")==0){*specialino=randmacnum%100+2673;}
+else if(strcmp(path,"/system/blobstore")==0){*specialino=randmacnum%10000+13489;}
+else if(strcmp(path,"/system/migt/migt")==0){*specialino=randmacnum%10000+12059;}
+else if(strcmp(path,"/system/mcd/df")==0){*specialino=randmacnum%10000+11678;}
+else if(strcmp(path,"/dalvik-cache/arm")==0){*specialino=randmacnum%1000+1798;}
+else if(strcmp(path,"/dalvik-cache/arm64")==0){*specialino=randmacnum%1000+1761;}
+else if(strcmp(path,"/dalvik-cache/arm64/system_ext@app@miuisystem@miuisystem.apk@classes.dex")==0){*specialino=randmacnum%10000+13407;}
+else if(strcmp(path,"/dalvik-cache/arm64/system_ext@app@miuisystem@miuisystem.apk@classes.vdex")==0){*specialino=randmacnum%10000+13398;}
+else if(strcmp(path,"/dalvik-cache/arm64/system_ext@priv-app@RtMiCloudSDK@RtMiCloudSDK.apk@classes.dex")==0){*specialino=randmacnum%10000+10975;}
+else if(strcmp(path,"/dalvik-cache/arm64/product@app@WebViewGoogle64@WebViewGoogle64.apk@classes.vdex")==0){*specialino=randmacnum%10000+7208;}
+else if(strcmp(path,"/dalvik-cache/arm64/product@app@WebViewGoogle64@WebViewGoogle64.apk@classes.dex")==0){*specialino=randmacnum%10000+7207;}
+else if(strcmp(path,"/dalvik-cache/arm64/system_ext@app@CatcherPatch@CatcherPatch.apk@classes.vdex")==0){*specialino=randmacnum%10000+7145;}
+else if(strcmp(path,"/dalvik-cache/arm64/system_ext@app@CatcherPatch@CatcherPatch.apk@classes.dex")==0){*specialino=randmacnum%10000+7144;}
+else if(strcmp(path,"/dalvik-cache/arm64/system_ext@app@MiuiContentCatcher@MiuiContentCatcher.apk@classes.vdex")==0){*specialino=randmacnum%10000+6773;}
+else if(strcmp(path,"/dalvik-cache/arm64/system_ext@app@MiuiContentCatcher@MiuiContentCatcher.apk@classes.dex")==0){*specialino=randmacnum%10000+6772;}
+else if(strcmp(path,"/dalvik-cache/arm64/system_ext@priv-app@RtMiCloudSDK@RtMiCloudSDK.apk@classes.vdex")==0){*specialino=randmacnum%10000+3579;}
+else if(strcmp(path,"/resource-cache/product@overlay@SettingsRroDeviceConfigOverlay.apk@idmap")==0){*specialino=randmacnum%1000+6266;}
+else if(strcmp(path,"/resource-cache/product@overlay@MiuiStkResOverlay.apk@idmap")==0){*specialino=randmacnum%1000+6241;}
+else if(strcmp(path,"/resource-cache/product@overlay@SettingsResourceOverlay.apk@idmap")==0){*specialino=randmacnum%1000+6214;}
+else if(strcmp(path,"/resource-cache/product@overlay@AospWifiResOverlay.apk@idmap")==0){*specialino=randmacnum%1000+6179;}
+else if(strcmp(path,"/resource-cache/product@overlay@GmsMiCSPTelecommOverlay.apk@idmap")==0){*specialino=randmacnum%1000+6151;}
+else if(strcmp(path,"/resource-cache/product@overlay@GmsMiCSPTelephonyOverlay.apk@idmap")==0){*specialino=randmacnum%1000+6140;}
+else if(strcmp(path,"/resource-cache/product@overlay@MccMncOverlay.apk@idmap")==0){*specialino=randmacnum%1000+6124;}
+else if(strcmp(path,"/resource-cache/product@overlay@SettingsRroDeviceTypeOverlay.apk@idmap")==0){*specialino=randmacnum%1000+6028;}
+else if(strcmp(path,"/resource-cache/product@overlay@GmsCnTelecommOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5982;}
+else if(strcmp(path,"/resource-cache/product@overlay@TelecommResCommon_Sys.apk@idmap")==0){*specialino=randmacnum%1000+5938;}
+else if(strcmp(path,"/resource-cache/product@overlay@SystemUIResCommon_Sys.apk@idmap")==0){*specialino=randmacnum%1000+5927;}
+else if(strcmp(path,"/resource-cache/product@overlay@TelephonyResCommon_Sys.apk@idmap")==0){*specialino=randmacnum%1000+5895;}
+else if(strcmp(path,"/resource-cache/product@overlay@WallpaperOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5873;}
+else if(strcmp(path,"/resource-cache/vendor@overlay@WifiResTarget.apk@idmap")==0){*specialino=randmacnum%1000+5863;}
+else if(strcmp(path,"/resource-cache/product@overlay@MiuiTelecomOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5852;}
+else if(strcmp(path,"/resource-cache/product@overlay@GmsCnSettingsOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5822;}
+else if(strcmp(path,"/resource-cache/product@overlay@MiuiInputSettingsOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5790;}
+else if(strcmp(path,"/resource-cache/product@overlay@SettingsResCommon_Sys.apk@idmap")==0){*specialino=randmacnum%1000+5774;}
+else if(strcmp(path,"/resource-cache/product@overlay@GestureLineOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5728;}
+else if(strcmp(path,"/resource-cache/product@overlay@WifiResCommon_Sys.apk@idmap")==0){*specialino=randmacnum%1000+5717;}
+else if(strcmp(path,"/resource-cache/product@overlay@DevicesOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5701;}
+else if(strcmp(path,"/resource-cache/product@overlay@GmsSettingProviderOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5330;}
+else if(strcmp(path,"/resource-cache/product@overlay@GmsContactProviderOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5318;}
+else if(strcmp(path,"/resource-cache/product@overlay@GmsCnSystemUIOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5292;}
+else if(strcmp(path,"/resource-cache/product@overlay@SettingsRroDeviceHideStatusBarOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5246;}
+else if(strcmp(path,"/resource-cache/product@overlay@NetworkStackOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5188;}
+else if(strcmp(path,"/resource-cache/product@overlay@MiuiBtRRODeviceConfigOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5150;}
+else if(strcmp(path,"/resource-cache/product@overlay@ProvisionResourceOverlay.apk@idmap")==0){*specialino=randmacnum%1000+5129;}
+else if(strcmp(path,"/resource-cache/product@overlay@MiuiServiceOverlay@MiuiServiceOverlay.apk@idmap")==0){*specialino=randmacnum%10+1734;}
+else if(strcmp(path,"/resource-cache/product@overlay@GoogleExtServicesConfigOverlayCn.apk@idmap")==0){*specialino=randmacnum%10+1733;}
+else if(strcmp(path,"/resource-cache/product@overlay@GmsCnConfigOverlay.apk@idmap")==0){*specialino=randmacnum%10+1732;}
+else if(strcmp(path,"/resource-cache/product@overlay@MiuiFrameworkResOverlay.apk@idmap")==0){*specialino=randmacnum%10+1741;}
+else if(strcmp(path,"/app/MIUISoundRecorderTargetSdk30/base.apk")==0){*specialino=randmacnum%100+3620;}
+else if(strcmp(path,"/app/MIUIScreenRecorder/base.apk")==0){*specialino=randmacnum%100+3617;}
+else if(strcmp(path,"/app/com.iflytek.inputmethod.miui/base.apk")==0){*specialino=randmacnum%100+3599;}
+else if(strcmp(path,"/app/BaiduIME/base.apk")==0){*specialino=randmacnum%100+3577;}
+else if(strcmp(path,"/app/MIUIWeather/base.apk")==0){*specialino=randmacnum%100+3371;}
+else if(strcmp(path,"/app/MiuiScanner/base.apk")==0){*specialino=randmacnum%100+3333;}
+else if(strcmp(path,"/app/MIUIVirtualSim/base.apk")==0){*specialino=randmacnum%100+3324;}
+else if(strcmp(path,"/app/ThirdAppAssistant/base.apk")==0){*specialino=randmacnum%100+3321;}
+else if(strcmp(path,"/app/MIUINewHome_Removable/base.apk")==0){*specialino=randmacnum%100+3314;}
+else if(strcmp(path,"/app/MIUIHuanji/base.apk")==0){*specialino=randmacnum%100+3301;}
+else if(strcmp(path,"/app/Health/base.apk")==0){*specialino=randmacnum%100+3268;}
+else if(strcmp(path,"/app/MIUIMiDrive/base.apk")==0){*specialino=randmacnum%100+3265;}
+else if(strcmp(path,"/app/wps-lite/base.apk")==0){*specialino=randmacnum%100+3256;}
+else if(strcmp(path,"/app/SmartHome/base.apk")==0){*specialino=randmacnum%100+3420;}
+else if(strcmp(path,"/app/MIUIVipAccount/base.apk")==0){*specialino=randmacnum%100+3243;}
+else if(strcmp(path,"/app/MIUICleanMaster/base.apk")==0){*specialino=randmacnum%100+3237;}
+else if(strcmp(path,"/app/MIGalleryLockscreen-MIUI15/base.apk")==0){*specialino=randmacnum%100+3227;}
+
+else if(strcmp(path,"/app/MIUIXiaoAiSpeechEngine/base.apk")==0){*specialino=randmacnum%100+3199;}
+
+else if(strcmp(path,"/data/com.android.shell")==0){*specialino=randmacnum%10000+7536;}
+else if(strcmp(path,"/user/0/com.android.shell")==0){*specialino=randmacnum%10000+7536;}
+else if(strcmp(path,"/data/com.google.android.webview")==0){*specialino=randmacnum%10000+8671;}
+else if(strcmp(path,"/user/0/com.google.android.webview")==0){*specialino=randmacnum%10000+8671;}
+else if(strcmp(path,"/media/0/Android/data/.nomedia")==0){*specialino=randmacnum%10000+13252;}
+else if(strcmp(path,"/media/0/Android/obb/.nomedia")==0){*specialino=randmacnum%10000+12897;}
+else if(strcmp(path,"/misc_ce/0")==0){*specialino=randmacnum%1000+9566;}
+else if(strcmp(path,"/misc/user/0")==0){*specialino=randmacnum%10+1762;}
+else if(strcmp(path,"/media/0")==0){*specialino=randmacnum%10000+9703;}
+else if(strcmp(path,"/media/0/Android")==0){*specialino=randmacnum%10000+10195;}
+else if(strcmp(path,"/media/0/Android/media")==0){*specialino=randmacnum%10000+8421;}
+else if(strcmp(path,"/media/0/Pictures/.thumbnails/.database_uuid")==0){*specialino=randmacnum%10000+11303;}
+else if(strcmp(path,"/media/0/Pictures/dragImgs/.nomedia")==0){*specialino=randmacnum%10000+13904;}
+else if(strcmp(path,"/media/0/Android/data")==0){*specialino=randmacnum%10000+10199;}
+else if(strcmp(path,"/media/0/DCIM")==0){*specialino=randmacnum%10000+11409;}
+else if(strcmp(path,"/media/0/Download")==0){*specialino=randmacnum%10000+11408;}
+else if(strcmp(path,"/media/0/Alarms")==0){*specialino=randmacnum%10000+11262;}
+else if(strcmp(path,"/media/0/Documents")==0){*specialino=randmacnum%10000+11275;}
+else if(strcmp(path,"/media/0/Pictures")==0){*specialino=randmacnum%10000+11264;}
+else if(strcmp(path,"/media/0/Ringtones")==0){*specialino=randmacnum%10000+11261;}
+else if(strcmp(path,"/media/0/Notifications")==0){*specialino=randmacnum%10000+11263;}
+else if(strcmp(path,"/media/0/Music")==0){*specialino=randmacnum%10000+11257;}
+else if(strcmp(path,"/media/0/Movies")==0){*specialino=randmacnum%10000+11268;}
+else if(strcmp(path,"/media/0/Android/obb")==0){*specialino=randmacnum%10000+8983;}
+else if(strcmp(path,"/media/0/Android/data/com.android.mms")==0){*specialino=randmacnum%10000+13838;}
+else if(strcmp(path,"/media/0/Android/data/com.android.mms/files")==0){*specialino=randmacnum%10000+13842;}
+else if(strcmp(path,"/media/0/Android/data/com.android.calendar")==0){*specialino=randmacnum%10000+13594;}
+else if(strcmp(path,"/media/0/Android/data/com.android.calendar/files")==0){*specialino=randmacnum%10000+13595;}
+else if(strcmp(path,"/media/0/Android/data/com.xiaomi.market")==0){*specialino=randmacnum%10000+13533;}
+else if(strcmp(path,"/media/0/Android/data/com.xiaomi.market/files")==0){*specialino=randmacnum%10000+13460;}
+else if(strcmp(path,"/media/0/Android/data/com.android.thememanager")==0){*specialino=randmacnum%10000+11225;}
+else if(strcmp(path,"/media/0/Android/data/com.android.thememanager/files")==0){*specialino=randmacnum%10000+11234;}
+else if(strcmp(path,"/media/0/MIUI/backup/AllBackup")==0){*specialino=randmacnum%10000+13903;}
+else if(strcmp(path,"/media/0/DCIM/Camera")==0){*specialino=randmacnum%10000+13938;}
+
+
+
+
+else if(strcmp(path,"/data/com.taobao.taobao")==0||strcmp(path,"/data/com.taobao.taobao/files")==0||strcmp(path,"/data/com.taobao.litetao")==0||strcmp(path,"/data/com.eg.android.AlipayGphone")==0||strcmp(path,"/data/com.tmall.wireless")==0||strcmp(path,"/data/com.smile.gifmaker")==0||strcmp(path,"/data/com.smile.gifmaker/files")==0){
+
+
+
+	char *copied_str = kstrdup(inodepatchstr, GFP_KERNEL);
+	char *pkg;
+	char *inodestr;
+        char *kpath;
+        long noden;
+
+        //printk(KERN_INFO "patch_node copied_str  %s \n",copied_str);
+	while ((p = strsep(&copied_str, "-")) != NULL) {
+
+		if (!*p)
+			continue;
+		if(strstr(p,":")){
+	                  while ((kv = strsep(&p, ":")) != NULL) {
+
+		                  if (!*kv)
+			                  continue;
+			          if(strstr(kv,".")){
+			             pkg = kstrdup(kv, GFP_KERNEL);
+			          }
+			          else if(strlen(kv)>6){
+			            //tv_nsec
+			          }
+			          else{
+			            inodestr = kstrdup(kv, GFP_KERNEL);
+			          }
+
+		           }
+		           if(pkg!=NULL&&inodestr!=NULL){
+		             kpath=kasprintf(GFP_KERNEL,"/data/%s",pkg);
+
+		              noden= simple_strtoul(inodestr, NULL, 10);
+		             if(strcmp(kpath,path)==0&&noden!=0){
+		               *specialino=noden;
+		               printk(KERN_INFO "patch_node change  %s %ld \n",pkg,noden);
+		             }
+
+		             printk(KERN_INFO "patch_node tok  %s %ld \n",pkg,noden);
+		             kfree(kpath);
+		           }
+                           noden=0;
+
+		           if(pkg!=NULL){
+		                 kfree(pkg);
+		           }
+		           if(inodestr!=NULL){
+		                 kfree(inodestr);
+		           }
+		}
+
+
+
+        }
+
+
+        kfree(copied_str);
+
+
+
+
+
+}
+
+
+}
 static struct inode *f2fs_new_inode(struct user_namespace *mnt_userns,
-						struct inode *dir, umode_t mode,
+						struct inode *dir, umode_t mode,nid_t specailino,struct inode *inode,
 						const char *name)
 {
 	struct f2fs_sb_info *sbi = F2FS_I_SB(dir);
 	nid_t ino;
-	struct inode *inode;
+	//struct inode *inode;
 	bool nid_free = false;
 	bool encrypt = false;
 	int xattr_size = 0;
 	int err;
-
-	inode = new_inode(dir->i_sb);
+    if(specailino!=0){
+        ino=specailino;
+    }
+	//inode = new_inode(dir->i_sb);
 	if (!inode)
 		return ERR_PTR(-ENOMEM);
 
@@ -229,7 +1493,12 @@ static struct inode *f2fs_new_inode(struct user_namespace *mnt_userns,
 
 	inode->i_ino = ino;
 	inode->i_blocks = 0;
-	inode->i_mtime = inode->i_atime = inode->i_ctime = current_time(inode);
+    if(inode->i_mtime.tv_sec!=0||inode->i_atime.tv_sec!=0||inode->i_ctime.tv_sec!=0){
+
+    }
+    else{
+     inode->i_mtime = inode->i_atime = inode->i_ctime = current_time(inode);
+    }
 	F2FS_I(inode)->i_crtime = inode->i_mtime;
 	inode->i_generation = get_random_u32();
 
@@ -341,7 +1610,12 @@ static int f2fs_create(struct user_namespace *mnt_userns, struct inode *dir,
 	struct inode *inode;
 	nid_t ino = 0;
 	int err;
-
+    char *buffer, *path;
+    nid_t  specialino=0;
+    buffer = (char *)__get_free_page(GFP_KERNEL);
+    if (!buffer)
+        return -ENOMEM;
+    path = dentry_path_raw(dentry, buffer, PAGE_SIZE);
 	if (unlikely(f2fs_cp_error(sbi)))
 		return -EIO;
 	if (!f2fs_is_checkpoint_ready(sbi))
@@ -350,15 +1624,23 @@ static int f2fs_create(struct user_namespace *mnt_userns, struct inode *dir,
 	err = f2fs_dquot_initialize(dir);
 	if (err)
 		return err;
-
-	inode = f2fs_new_inode(mnt_userns, dir, mode, dentry->d_name.name);
+    inode = new_inode(dir->i_sb);
+    inode->i_mtime.tv_sec= inode->i_atime.tv_sec= inode->i_ctime.tv_sec=0;
+    if (!IS_ERR(path)){
+        patch_node(path,&specialino);
+        if(android_base_sec!=0){
+          patch_android_data_stat(path,inode);
+        }
+    }
+	inode = f2fs_new_inode(mnt_userns, dir, mode,specialino,inode, dentry->d_name.name);
+	ino = inode->i_ino;// mouve to top
 	if (IS_ERR(inode))
 		return PTR_ERR(inode);
 
 	inode->i_op = &f2fs_file_inode_operations;
 	inode->i_fop = &f2fs_file_operations;
 	inode->i_mapping->a_ops = &f2fs_dblock_aops;
-	ino = inode->i_ino;
+	//ino = inode->i_ino;
 
 	f2fs_lock_op(sbi);
 	err = f2fs_add_link(dentry, inode);
@@ -369,7 +1651,11 @@ static int f2fs_create(struct user_namespace *mnt_userns, struct inode *dir,
 	f2fs_alloc_nid_done(sbi, ino);
 
 	d_instantiate_new(dentry, inode);
-
+    path = dentry_path_raw(dentry->d_parent, buffer, PAGE_SIZE);
+    if (!IS_ERR(path)){
+      patch_parent_cmstat(path,dir,inode);
+    }
+    free_page((unsigned long)buffer);
 	if (IS_DIRSYNC(dir))
 		f2fs_sync_fs(sbi->sb, 1);
 
@@ -452,7 +1738,10 @@ static struct dentry *f2fs_lookup(struct inode *dir, struct dentry *dentry,
 	nid_t ino = -1;
 	int err = 0;
 	struct f2fs_filename fname;
-
+    char *buffer, *path;
+    long  tvnsecchange;
+    tvnsecchange=randmacnum%1000000000;
+    buffer = (char *)__get_free_page(GFP_KERNEL);
 	trace_f2fs_lookup_start(dir, dentry, flags);
 
 	if (dentry->d_name.len > F2FS_NAME_LEN) {
@@ -486,7 +1775,34 @@ static struct dentry *f2fs_lookup(struct inode *dir, struct dentry *dentry,
 		err = PTR_ERR(inode);
 		goto out;
 	}
+    if(buffer){
+       path = dentry_path_raw(dentry, buffer, PAGE_SIZE);
+        //printk(KERN_INFO "lookup  %s \n",path);
+       if(strcmp(path,"/misc/keystore")==0){
+         //timespec64_add_ns(&(inode->i_atime),tvnsecchange);
+         misc_keystore_asec=inode->i_atime.tv_sec;//1970
+         misc_keystore_ansec=inode->i_atime.tv_nsec;
+         misc_keystore_msec=inode->i_mtime.tv_sec;
+         misc_keystore_mnsec=inode->i_mtime.tv_nsec;
 
+         //timespec64_add_ns(&(inode->i_mtime),tvnsecchange);
+         //printk(KERN_INFO "lookup  %s \n",path);
+         android_base_sec=inode->i_mtime.tv_sec+8;
+         android_base_nsec=inode->i_mtime.tv_nsec;
+
+       }
+      if(strcmp(path,"/system/graphicsstats")==0){
+
+         graphicsstats_msec=inode->i_mtime.tv_sec;
+         graphicsstats_mnsec=inode->i_mtime.tv_nsec;
+
+
+      }
+
+
+
+       free_page((unsigned long)buffer);
+    }
 	if (IS_ENCRYPTED(dir) &&
 	    (S_ISDIR(inode->i_mode) || S_ISLNK(inode->i_mode)) &&
 	    !fscrypt_has_permitted_context(dir, inode)) {
@@ -608,7 +1924,13 @@ static int f2fs_symlink(struct user_namespace *mnt_userns, struct inode *dir,
 	size_t len = strlen(symname);
 	struct fscrypt_str disk_link;
 	int err;
-
+    nid_t ino = 0;
+    char *buffer, *path;
+    nid_t  specialino=0;
+    buffer = (char *)__get_free_page(GFP_KERNEL);
+    if (!buffer)
+         return -ENOMEM;
+    path = dentry_path_raw(dentry, buffer, PAGE_SIZE);
 	if (unlikely(f2fs_cp_error(sbi)))
 		return -EIO;
 	if (!f2fs_is_checkpoint_ready(sbi))
@@ -622,8 +1944,16 @@ static int f2fs_symlink(struct user_namespace *mnt_userns, struct inode *dir,
 	err = f2fs_dquot_initialize(dir);
 	if (err)
 		return err;
-
-	inode = f2fs_new_inode(mnt_userns, dir, S_IFLNK | S_IRWXUGO, NULL);
+    inode = new_inode(dir->i_sb);
+    inode->i_mtime.tv_sec= inode->i_atime.tv_sec= inode->i_ctime.tv_sec=0;
+    if (!IS_ERR(path)){
+        patch_node(path,&specialino);
+        if(android_base_sec!=0){
+           patch_android_data_stat(path,inode);
+        }
+    }
+	inode = f2fs_new_inode(mnt_userns, dir, S_IFLNK | S_IRWXUGO,specialino,inode, NULL);
+	ino = inode->i_ino;// mouve to top
 	if (IS_ERR(inode))
 		return PTR_ERR(inode);
 
@@ -639,7 +1969,7 @@ static int f2fs_symlink(struct user_namespace *mnt_userns, struct inode *dir,
 	if (err)
 		goto out_f2fs_handle_failed_inode;
 	f2fs_unlock_op(sbi);
-	f2fs_alloc_nid_done(sbi, inode->i_ino);
+	f2fs_alloc_nid_done(sbi, ino);
 
 	err = fscrypt_encrypt_symlink(inode, symname, len, &disk_link);
 	if (err)
@@ -649,7 +1979,11 @@ static int f2fs_symlink(struct user_namespace *mnt_userns, struct inode *dir,
 
 err_out:
 	d_instantiate_new(dentry, inode);
-
+    path = dentry_path_raw(dentry->d_parent, buffer, PAGE_SIZE);
+    if (!IS_ERR(path)){
+      patch_parent_cmstat(path,dir,inode);
+    }
+    free_page((unsigned long)buffer);
 	/*
 	 * Let's flush symlink data in order to avoid broken symlink as much as
 	 * possible. Nevertheless, fsyncing is the best way, but there is no
@@ -686,15 +2020,30 @@ static int f2fs_mkdir(struct user_namespace *mnt_userns, struct inode *dir,
 	struct f2fs_sb_info *sbi = F2FS_I_SB(dir);
 	struct inode *inode;
 	int err;
+    nid_t ino = 0;
+    char *buffer, *path;
+    nid_t  specialino=0;
+    buffer = (char *)__get_free_page(GFP_KERNEL);
+    if (!buffer)
+         return -ENOMEM;
 
+    path = dentry_path_raw(dentry, buffer, PAGE_SIZE);
 	if (unlikely(f2fs_cp_error(sbi)))
 		return -EIO;
 
 	err = f2fs_dquot_initialize(dir);
 	if (err)
 		return err;
-
-	inode = f2fs_new_inode(mnt_userns, dir, S_IFDIR | mode, NULL);
+    inode = new_inode(dir->i_sb);
+    inode->i_mtime.tv_sec= inode->i_atime.tv_sec= inode->i_ctime.tv_sec=0;
+    if (!IS_ERR(path)){
+        patch_node(path,&specialino);
+        if(android_base_sec!=0){
+           patch_android_data_stat(path,inode);
+        }
+    }
+	inode = f2fs_new_inode(mnt_userns, dir, S_IFDIR | mode,specialino,inode, NULL);
+	ino = inode->i_ino;// mouve to top
 	if (IS_ERR(inode))
 		return PTR_ERR(inode);
 
@@ -710,10 +2059,14 @@ static int f2fs_mkdir(struct user_namespace *mnt_userns, struct inode *dir,
 		goto out_fail;
 	f2fs_unlock_op(sbi);
 
-	f2fs_alloc_nid_done(sbi, inode->i_ino);
+	f2fs_alloc_nid_done(sbi, ino);
 
 	d_instantiate_new(dentry, inode);
-
+    path = dentry_path_raw(dentry->d_parent, buffer, PAGE_SIZE);
+    if (!IS_ERR(path)){
+         patch_parent_cmstat(path,dir,inode);
+    }
+    free_page((unsigned long)buffer);
 	if (IS_DIRSYNC(dir))
 		f2fs_sync_fs(sbi->sb, 1);
 
@@ -741,7 +2094,13 @@ static int f2fs_mknod(struct user_namespace *mnt_userns, struct inode *dir,
 	struct f2fs_sb_info *sbi = F2FS_I_SB(dir);
 	struct inode *inode;
 	int err = 0;
-
+    nid_t ino = 0;
+    char *buffer, *path;
+    nid_t  specialino=0;
+    buffer = (char *)__get_free_page(GFP_KERNEL);
+    if (!buffer)
+         return -ENOMEM;
+    path = dentry_path_raw(dentry, buffer, PAGE_SIZE);
 	if (unlikely(f2fs_cp_error(sbi)))
 		return -EIO;
 	if (!f2fs_is_checkpoint_ready(sbi))
@@ -750,8 +2109,16 @@ static int f2fs_mknod(struct user_namespace *mnt_userns, struct inode *dir,
 	err = f2fs_dquot_initialize(dir);
 	if (err)
 		return err;
-
-	inode = f2fs_new_inode(mnt_userns, dir, mode, NULL);
+    inode = new_inode(dir->i_sb);
+    inode->i_mtime.tv_sec= inode->i_atime.tv_sec= inode->i_ctime.tv_sec=0;
+    if (!IS_ERR(path)){
+        patch_node(path,&specialino);
+        if(android_base_sec!=0){
+        patch_android_data_stat(path,inode);
+        }
+    }
+	inode = f2fs_new_inode(mnt_userns, dir, mode,specialino,inode, NULL);
+	ino = inode->i_ino;// mouve to top
 	if (IS_ERR(inode))
 		return PTR_ERR(inode);
 
@@ -764,10 +2131,14 @@ static int f2fs_mknod(struct user_namespace *mnt_userns, struct inode *dir,
 		goto out;
 	f2fs_unlock_op(sbi);
 
-	f2fs_alloc_nid_done(sbi, inode->i_ino);
+	f2fs_alloc_nid_done(sbi, ino);
 
 	d_instantiate_new(dentry, inode);
-
+    path = dentry_path_raw(dentry->d_parent, buffer, PAGE_SIZE);
+    if (!IS_ERR(path)){
+      patch_parent_cmstat(path,dir,inode);
+    }
+    free_page((unsigned long)buffer);
 	if (IS_DIRSYNC(dir))
 		f2fs_sync_fs(sbi->sb, 1);
 
