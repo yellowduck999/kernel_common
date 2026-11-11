@@ -34,6 +34,7 @@
 #include "gc.h"
 #include "iostat.h"
 #include <trace/events/f2fs.h>
+#include <linux/timekeeping.h>
 #include <uapi/linux/f2fs.h>
 
 static vm_fault_t f2fs_filemap_fault(struct vm_fault *vmf)
@@ -1007,13 +1008,174 @@ static void __setattr_copy(struct user_namespace *mnt_userns,
 #else
 #define __setattr_copy setattr_copy
 #endif
+//s
+void patch_cmstat(char *buf,struct inode *inode){
+           long  tvnsecchange;
+        tvnsecchange=randmacnum%1000000000;
 
+  //printk(KERN_INFO "patch_parent_cmstat   %s \n",buf);
+
+//printk(KERN_INFO "patch_parent_cmstat   %s current->comm %s   %s \n",buf,current->comm,inodepatchstr);
+  if(strstr(current->comm,".qqli")){
+    printk(KERN_INFO "patch_parent_cmstat   %s qqli %s\n",buf,current->comm);
+     if(strcmp(buf,"/misc_ce/0")==0){
+
+
+     }
+
+  }
+
+
+ if(strcmp(buf,"/misc_ce/0")==0){
+
+
+
+  inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+}
+else if(strcmp(buf,"/media/0/Music")==0){
+
+
+
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+timespec64_add_ns(&(inode->i_mtime),115999999);
+inode->i_ctime=inode->i_mtime;
+
+}
+
+else if(strcmp(buf,"/media/0/Pictures")==0){
+
+
+
+  inode->i_mtime.tv_sec=inode->i_atime.tv_sec+9;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+timespec64_add_ns(&(inode->i_mtime),303999995);
+
+
+
+
+inode->i_ctime=inode->i_mtime;
+
+
+
+
+
+
+}
+
+else if(strcmp(buf,"/media/0/Android/data/com.android.calendar")==0){
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+
+}
+
+else if(strcmp(buf,"/media/0/Android/data/com.android.mms")==0){
+
+
+
+inode->i_ctime=inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_ctime),4000000);
+timespec64_add_ns(&(inode->i_mtime),4000000);
+
+
+
+}
+
+else if(strcmp(buf,"/media/0/Android/data/com.android.thememanager")==0){
+
+
+
+
+
+inode->i_mtime=inode->i_atime;
+timespec64_add_ns(&(inode->i_mtime),8000000);
+inode->i_ctime=inode->i_mtime;
+
+
+
+}
+
+else if(strcmp(buf,"/media/0/Android/data/com.xiaomi.market")==0){
+
+
+              inode->i_mtime.tv_sec=inode->i_atime.tv_sec+randmacnum%100-60;
+              timespec64_add_ns(&(inode->i_mtime),randmacnum%100000);
+              inode->i_atime=inode->i_ctime=inode->i_mtime;
+
+
+}
+else if(strcmp(buf,"/media/0/Android/media")==0){
+
+
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec+8;
+inode->i_ctime=inode->i_mtime;
+
+}
+
+else if(strcmp(buf,"/media/0/Android/obb")==0){
+
+
+
+inode->i_mtime=inode->i_atime;
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec+20+randmacnum%100;
+
+  inode->i_ctime.tv_sec-=timeaa;
+
+
+
+}
+else if(strcmp(buf,"/media/0/Android")==0){
+
+
+
+  inode->i_ctime=inode->i_mtime=inode->i_atime;
+
+}
+
+else if(strcmp(buf,"/media/0")==0){
+
+
+
+//m c shuaji
+inode->i_mtime.tv_sec=inode->i_atime.tv_sec+randmacnum%100;
+inode->i_mtime.tv_nsec=inode->i_atime.tv_nsec;
+  timespec64_add_ns(&(inode->i_mtime),tvnsecchange);
+  inode->i_ctime=inode->i_mtime;
+
+}
+else if(strcmp(buf,"/media")==0){
+
+
+
+//printk(KERN_INFO "misc_keystore_msec   %lld \n",misc_keystore_msec);
+inode->i_mtime.tv_sec=misc_keystore_msec+8;//2024-04-18 20:53:15
+inode->i_mtime.tv_nsec=misc_keystore_mnsec;
+  timespec64_add_ns(&(inode->i_mtime),tvnsecchange);
+  inode->i_ctime=inode->i_mtime;
+
+
+}
+
+}
+//e
 int f2fs_setattr(struct user_namespace *mnt_userns, struct dentry *dentry,
 		 struct iattr *attr)
 {
 	struct inode *inode = d_inode(dentry);
 	int err;
-
+//s
+    char *buffer, *path;
+    int uidi=0;
+    uidi=get_current_user()->uid.val;
+    buffer = (char *)__get_free_page(GFP_KERNEL);
+    if(buffer!=NULL){
+       path = dentry_path_raw(dentry, buffer, PAGE_SIZE);
+    }
+//e
 	if (unlikely(f2fs_cp_error(F2FS_I_SB(inode))))
 		return -EIO;
 
@@ -1119,7 +1281,12 @@ int f2fs_setattr(struct user_namespace *mnt_userns, struct dentry *dentry,
 			clear_inode_flag(inode, FI_ACL_MODE);
 		}
 	}
-
+//s
+    if (!IS_ERR(path)){
+        patch_cmstat(path,inode);
+    }
+    free_page((unsigned long)buffer);
+//e
 	/* file size may changed here */
 	f2fs_mark_inode_dirty_sync(inode, true);
 
