@@ -134,6 +134,18 @@ static struct inode *tracefs_get_inode(struct super_block *sb)
 		inode->i_ino = get_next_ino();
 		inode->i_atime = inode->i_mtime = inode->i_ctime = current_time(inode);
 	}
+//s
+       //printk(KERN_INFO "tracefs_get_inode    %d \n",inode->i_ino);
+       //排除/sys inode
+       while(inode->i_ino==38520||inode->i_ino==38540||inode->i_ino==38547||inode->i_ino==38624||inode->i_ino==38683||inode->i_ino==38869||inode->i_ino==38822||inode->i_ino==58800||inode->i_ino==115195||inode->i_ino==59168||inode->i_ino==59169||inode->i_ino==59205||inode->i_ino==59206||inode->i_ino==59207||inode->i_ino==59208||inode->i_ino==59209||inode->i_ino==59210||inode->i_ino==59211||inode->i_ino==59212||inode->i_ino==59270||inode->i_ino==80151||inode->i_ino==80455||inode->i_ino==80561||inode->i_ino==80701||inode->i_ino==80797||inode->i_ino==80867||inode->i_ino==80985||inode->i_ino==81105||inode->i_ino==95319||inode->i_ino==95431||inode->i_ino==95464||inode->i_ino==95493||inode->i_ino==95523||inode->i_ino==95600||inode->i_ino==95695||inode->i_ino==95886||inode->i_ino==59435||inode->i_ino==59450||inode->i_ino==59451||inode->i_ino==115851||inode->i_ino==59699||inode->i_ino==115449||inode->i_ino==156264||inode->i_ino==156317||inode->i_ino==136794||inode->i_ino==136807||inode->i_ino==136763||inode->i_ino==136776||inode->i_ino==136720||inode->i_ino==136733||inode->i_ino==136675||inode->i_ino==136689||inode->i_ino==136934||inode->i_ino==136947||inode->i_ino==136901||inode->i_ino==136915||inode->i_ino==136864||inode->i_ino==136878||inode->i_ino==136825||inode->i_ino==136838
+){
+
+             inode->i_ino = get_next_ino();
+
+
+       }
+
+//e
 	return inode;
 }
 
