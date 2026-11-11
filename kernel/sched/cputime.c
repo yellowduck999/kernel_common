@@ -4,7 +4,9 @@
  */
 #include <linux/cpufreq_times.h>
 #include <trace/hooks/sched.h>
-
+#include <linux/random.h>
+#include <linux/timekeeping.h>
+static long changed=-1;
 #ifdef CONFIG_IRQ_TIME_ACCOUNTING
 
 /*
@@ -235,10 +237,15 @@ void account_idle_time(u64 cputime)
 	u64 *cpustat = kcpustat_this_cpu->cpustat;
 	struct rq *rq = this_rq();
 
-	if (atomic_read(&rq->nr_iowait) > 0)
-		cpustat[CPUTIME_IOWAIT] += cputime;
-	else
+	if (atomic_read(&rq->nr_iowait) > 0){
+		cpustat[CPUTIME_IOWAIT] += cputime;}
+	else{
 		cpustat[CPUTIME_IDLE] += cputime;
+        if(changed<0){
+             cpustat[CPUTIME_IDLE] += timeaa*3*1000000000LL;
+             changed=1;
+        }
+	{
 }
 
 
