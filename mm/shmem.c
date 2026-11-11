@@ -36,6 +36,7 @@
 #include <linux/swap.h>
 #include <linux/uio.h>
 #include <linux/hugetlb.h>
+#include <linux/timekeeping.h>
 #include <linux/fs_parser.h>
 #include <linux/swapfile.h>
 #include <linux/iversion.h>
@@ -2920,19 +2921,20 @@ static int shmem_statfs(struct dentry *dentry, struct kstatfs *buf)
 	buf->f_type = TMPFS_MAGIC;
 	buf->f_bsize = PAGE_SIZE;
 	buf->f_namelen = NAME_MAX;
+	long riv=randmacnum%10000;
 	if (sbinfo->max_blocks) {
-		buf->f_blocks = sbinfo->max_blocks;
+		buf->f_blocks = sbinfo->max_blocks+riv;
 		buf->f_bavail =
 		buf->f_bfree  = sbinfo->max_blocks -
-				percpu_counter_sum(&sbinfo->used_blocks);
+				percpu_counter_sum(&sbinfo->used_blocks)+riv;
 	}
 	if (sbinfo->max_inodes) {
-		buf->f_files = sbinfo->max_inodes;
-		buf->f_ffree = sbinfo->free_inodes;
+		buf->f_files = sbinfo->max_inodes+riv;
+		buf->f_ffree = sbinfo->free_inodes+riv;
 	}
 	/* else leave those fields 0 like simple_statfs */
-
-	buf->f_fsid = uuid_to_fsid(dentry->d_sb->s_uuid.b);
+    const u8 *p = (const u8 *)&randmacnum;
+	buf->f_fsid = uuid_to_fsid(p);
 
 	return 0;
 }
