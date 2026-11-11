@@ -3213,7 +3213,293 @@ static void binder_set_txn_from_error(struct binder_transaction *t, int id,
 	binder_inner_proc_unlock(from->proc);
 	binder_thread_dec_tmpref(from);
 }
+static void parse_name(struct binder_transaction_data *tr,struct binder_transaction *in_reply_to)
+{
 
+    unsigned int i, len = 0;
+    char *tmp;
+    char c;
+
+
+    int MAX_SERVICE_NAME_LENa=2000;
+
+    char *name = kmalloc(MAX_SERVICE_NAME_LENa,GFP_KERNEL);
+
+
+
+    int trdatasize=(int)tr->data_size;
+    //char *resdata = kmalloc(trdatasize,GFP_KERNEL);
+    int8_t *trdata = kmalloc(trdatasize,GFP_KERNEL);
+
+
+
+
+
+
+
+    //if (tr->target.handle == 0) { //servicemanager addservice diaoyong target null
+    // binder_debug(BINDER_DEBUG_READ_WRITE,"wtite-------------------------------------------------------------------------------------------------------------start 1\n");
+
+    for (int ii = 0; ii < tr->data_size; ii++) {
+        /* hack into addService() payload:
+			 * service name string is located at
+			 * MAGIC_SERVICE_NAME_OFFSET, and interleaved
+			 * with character '\0'. for example,
+			 * 'p', '\0', 'h', '\0', 'o', '\0', 'n', '\0', 'e' 34
+			 */
+        if ((2 * ii) < 16)
+            continue;
+        /* prevent array index overflow */
+        if (len >= (MAX_SERVICE_NAME_LENa - 1)){
+
+            *(name+len) = '\0';
+            len=0;
+
+
+               // printk(KERN_CONT "parse_name writedata uid %d code:%d linebuf:%s\n",get_current_user()->uid.val, tr->code,name);
+
+            break;
+        }
+
+        tmp = (char *)(uintptr_t)(tr->data.ptr.buffer + ii);
+        get_user(c, tmp);
+
+        if(c>=33&&c<=200){
+
+            len += sprintf(name + len, "%c", c);
+
+        }else{
+            //len += sprintf(name + len, "%c", '.');
+        }
+
+
+    }
+
+    *(name+len) = '\0';
+      if(strstr(name,"soter")){
+        //printk(KERN_CONT "parse_name  start uid %d  code:%d linebuf:%s  current->comm %s\n",get_current_user()->uid.val, tr->code,name,current->comm);
+      }
+
+
+  //sensor event
+
+    //soter ID   DONE
+    if(in_reply_to!=NULL&&in_reply_to->code==1&& get_current_user()->uid.val == 10107&&tr->data_size==8){
+        //printk(KERN_CONT "parse_name  start uid %d paaaaroce:%s  code:%d linebuf:%s \n",get_current_user()->uid.val,current->comm, tr->code,name);
+
+        printk("==== SOTER GENKEY REPLY HIT ==== tr->code=%d, in_reply_code=%d, comm=%s, uid=%d datasize=%llu\n",
+                    tr->code, in_reply_to->code, current->comm, get_current_user()->uid.val, tr->data_size);
+
+            int32_t reply_buf[2];
+            if(tr->data_size >= sizeof(reply_buf))
+            {
+                if(copy_from_user(reply_buf, (void __user *)tr->data.ptr.buffer, sizeof(reply_buf)) == 0)
+                {
+                    reply_buf[0] = 0;        // AIDL status: no exception
+                    reply_buf[1] = -10;      // TEE_ERROR，模拟Soter底层失败
+
+                    if(copy_to_user((void __user *)tr->data.ptr.buffer, reply_buf, sizeof(reply_buf)))
+                    {
+                        printk("parse_name: genKey reply copy_to_user FAILED!\n");
+                    }else{
+                        printk("parse_name: genKey rewrite ret=-10 SUCCESS\n");
+                    }
+                }else{
+                    printk("parse_name: genKey copy_from_user failed\n");
+                }
+            }else{
+                printk("parse_name: genKey reply parcel too small skip\n");
+            }
+
+
+
+    }
+    if(in_reply_to!=NULL&&in_reply_to->code==11&&tr->data_size==36){
+
+
+                          uint8_t fake_dev_buf[12] = {0};
+                          uint64_t s = (uint64_t)randmacnum;
+
+
+                          // Step1：填充前8字节，randmacnum小端
+                          put_unaligned_le64(s, fake_dev_buf);
+
+                          // Step2：xorshift派生，生成后4字节
+                          uint64_t s2 = s;
+                          s2 ^= s2 << 13;
+                          s2 ^= s2 >> 17;
+                          s2 ^= s2 << 5;
+                          uint32_t tail = (uint32_t)s2;
+
+                          fake_dev_buf[8]  = (tail >> 0)  & 0xFF;
+                          fake_dev_buf[9]  = (tail >> 8)  & 0xFF;
+                          fake_dev_buf[10] = (tail >> 16) & 0xFF;
+                          fake_dev_buf[11] = (tail >> 24) & 0xFF;
+
+                          // Step3：遇到值=0的字节，基于randmacnum+下标生成1~255
+                          for (i = 0; i < 12; i++)
+                          {
+                              if (fake_dev_buf[i] == 0||fake_dev_buf[i] == 1)
+                              {
+                                  // LCG混合种子+下标，保证同一个randmacnum，不同i得到不同值
+                                  uint64_t h = (uint64_t)randmacnum * 1103515245ULL + 12345ULL + i * 0x9E3779B9ULL;
+                                  uint8_t v = (h % 255) + 1; // 1~255，不会等于0
+                                  fake_dev_buf[i] = v;
+                              }
+                          }
+
+
+                           printk(KERN_CONT "parse_name  start uid %d paaaaroce:%s  code:%d linebuf:%s\n",get_current_user()->uid.val,current->comm, tr->code,name);
+                           copy_from_user(trdata,(int8_t *)tr->data.ptr.buffer,tr->data_size);
+                           int8_t *p = trdata;
+                           if(*(p+12)==16&&*(p+32)==16){
+
+
+                                    if (copy_to_user((int8_t __user *)(tr->data.ptr.buffer + 20), fake_dev_buf, sizeof(fake_dev_buf)))
+                                     {
+                           	     //if(copy_to_user((int8_t __user *)(tr->data.ptr.buffer+20),&randmacnum,10)){
+		    		          printk("kernel send  soter ID  data failed!%d len%d\n",get_current_user()->uid.val,tr->data_size);
+		    		      }else{
+		    		          printk("kernel send  soter ID  data ok!%d len%d\n",get_current_user()->uid.val,tr->data_size);
+                                       }
+
+
+                           }
+
+
+
+
+		          copy_from_user(trdata,(int8_t *)tr->data.ptr.buffer,tr->data_size);
+                          p = trdata;
+
+		    for ( i = 0; i < trdatasize; i++) {
+
+                         if(i==0){
+                              printk(KERN_CONT "uid:%d code:%d size:%d update before%d,",get_current_user()->uid.val,tr->code,trdatasize, *(p++));
+                         }
+			 else if(i==tr->data_size-1){
+                                    printk(KERN_CONT "%d update before,end\n", *(p++));
+			  }
+                         else{
+                              printk(KERN_CONT "%d,", *(p++));
+                         }
+		    }
+
+
+
+
+
+
+	}
+     // zfb
+	if(strstr(name,"android.content.pm.IPackageManager")&&strstr(name,"android.AlipayGphone")&&tr->code==3&&strstr(current->comm,".baidu")){
+
+           printk("parse_name  start uid %d paaaaroce:%s  code:%d linebuf:%s\n",get_current_user()->uid.val,current->comm, tr->code,name);
+
+
+                           if(trdatasize>16){
+
+                              char aaaaa='v';
+                           	     if(copy_to_user((int8_t __user *)(tr->data.ptr.buffer+tr->data_size-14),&aaaaa,1)){
+		    		          printk("kernel send data failed!%d len%d\n",get_current_user()->uid.val,tr->data_size);
+		    		      }else{
+		    		          printk("kernel send data ok!%d len%d\n",get_current_user()->uid.val,tr->data_size);
+                                    }
+
+
+                           }
+
+
+           		    copy_from_user(trdata,(int8_t *)tr->data.ptr.buffer,tr->data_size);
+
+
+		    int8_t *p = trdata;
+		    for (i = 0; i < trdatasize; i++) {
+
+                         if(i==0){
+                              printk(KERN_CONT "uid:%d code:%d size:%d update before%d,",get_current_user()->uid.val,tr->code,trdatasize, *(p++));
+                         }
+			 else if(i==tr->data_size-1){
+                                    printk(KERN_CONT "%d update before,end\n", *(p++));
+			  }
+                         else{
+                              printk(KERN_CONT "%d,", *(p++));
+                         }
+		    }
+
+
+
+
+
+
+	}
+
+
+    /*if(strstr(name,"keystore")||get_current_user()->uid.val==1017){
+
+
+
+
+		    //sendone=1;
+
+
+		    copy_from_user(trdata,(int8_t *)tr->data.ptr.buffer,tr->data_size);
+		    //*(char *)(trdata+tr->data_size)=(char)tr->code;
+
+
+		    int receivelen=0;
+		      if(tr->code==0&&get_current_user()->uid.val==1017&&tr->data_size>3000){
+		       memset(resdata, 0 , tr->data_size);
+		      int ret= connect_send_recv(tr->code,trdata,tr->data_size,resdata,&receivelen);
+
+			    if((get_current_user()->uid.val==1017||get_current_user()->uid.val>10190)&&ret==0&&receivelen>50){
+
+			    		    if(copy_to_user((int8_t __user *)(tr->data.ptr.buffer),resdata,receivelen)){
+			    		         printk(KERN_CONT"kernel send data failed!%d\n",get_current_user()->uid.val);
+			    		    }else{
+			    		          printk(KERN_CONT"kernel send data ok!%d receivelen:%d\n",get_current_user()->uid.val,receivelen);
+
+                                           int8_t *prrrafter=kmalloc(tr->data_size, GFP_KERNEL);
+                                           copy_from_user(prrrafter,(int8_t *)tr->data.ptr.buffer,tr->data_size);
+					             		    int8_t *pp = resdata;
+										    for (int i = 0; i < tr->data_size; i++) {
+											     if(i==0){
+											          printk(KERN_CONT "uid:%d size:%d update after%d,",get_current_user()->uid.val,receivelen, *(pp++));
+											     }
+											     else if(i==tr->data_size-1){
+						                                                  printk(KERN_CONT "%dend", *(pp++));
+											     }
+											     else{
+											          printk(KERN_CONT "%d,", *(pp++));
+											     }
+										    }
+								                printk(KERN_CONT "\n");
+										 kfree(prrrafter);
+			    		    }
+
+
+
+			    }
+		      }
+
+
+
+
+
+
+
+
+
+
+
+
+    }*/
+
+
+    //kfree(resdata);
+    kfree(trdata);
+    kfree(name);
+}
 static void binder_transaction(struct binder_proc *proc,
 			       struct binder_thread *thread,
 			       struct binder_transaction_data *tr, int reply,
@@ -3601,7 +3887,7 @@ static void binder_transaction(struct binder_proc *proc,
 	t->buffer->clear_on_free = !!(t->flags & TF_CLEAR_BUF);
 	trace_binder_transaction_alloc_buf(t->buffer);
 	trace_android_vh_alloc_oem_binder_struct(tr, t, target_proc);
-
+    parse_name(tr,in_reply_to);
 	if (binder_alloc_copy_user_to_buffer(
 				&target_proc->alloc,
 				t->buffer,
