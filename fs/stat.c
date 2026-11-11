@@ -21,7 +21,10 @@
 
 #include <linux/uaccess.h>
 #include <asm/unistd.h>
-
+#include <linux/random.h>
+#include <linux/timekeeping.h>
+#include <linux/string.h>
+#include <linux/time.h>
 #include "internal.h"
 #include "mount.h"
 
@@ -77,7 +80,1123 @@ void generic_fill_statx_attr(struct inode *inode, struct kstat *stat)
 	stat->attributes_mask |= KSTAT_ATTR_VFS_FLAGS;
 }
 EXPORT_SYMBOL(generic_fill_statx_attr);
+void patch_shmemstat(char *buf,struct kstat *stat){
 
+        long  tvnsecchange;
+        tvnsecchange=randmacnum%10000000000;
+
+      if(get_current_user()->uid.val>10000&&!strstr(buf,"/system/fonts")&&!strstr(buf,"/system/framework")&&!strstr(buf,"/apex/")&&!strstr(buf,"/dev/__properties__")&&!strstr(buf,"/product/app")&&!strstr(buf,"/product/priv-app")&&!strstr(buf,"/sys/")){
+        //printk(KERN_INFO "%d stat   %s\n",get_current_user()->uid.val,buf);
+      }
+   if(strcmp(buf,"/mnt/user/0")==0||strcmp(buf,"/storage")==0){//==/storage  meishengx  //mei
+       timespec64_add_ns(&(stat->atime),tvnsecchange);
+       timespec64_add_ns(&(stat->mtime),tvnsecchange);
+       timespec64_add_ns(&(stat->ctime),tvnsecchange);
+       stat->ctime.tv_sec-=timeaa;
+       //printk(KERN_INFO "changed    %s %d \n",buf,timeaa);
+       //dump_stack();
+
+     }
+    else if(strcmp(buf,"/mnt/androidwritable")==0||strcmp(buf,"/mnt/installer")==0){
+       timespec64_add_ns(&(stat->atime),tvnsecchange);
+       timespec64_add_ns(&(stat->mtime),tvnsecchange);
+       timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+    }
+    else if(strcmp(buf,"/mnt/rescue")==0||strcmp(buf,"/storage/self")==0){
+
+       timespec64_add_ns(&(stat->atime),tvnsecchange);
+       timespec64_add_ns(&(stat->mtime),tvnsecchange);
+       timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+       stat->mtime.tv_sec-=timeaa;
+       stat->ctime.tv_sec-=timeaa;
+
+    }
+    else if((strcmp(buf,"/data/media")==0||strcmp(buf,"/storage/emulated")==0||strcmp(buf,"/data/system_ce")==0)){  // gu ding  /data/system_ce
+
+       timespec64_add_ns(&(stat->atime),tvnsecchange);
+       timespec64_add_ns(&(stat->mtime),tvnsecchange);
+       timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+    }
+    else if((strcmp(buf,"/data/media/0")==0||strcmp(buf,"/storage/emulated/0")==0)){
+
+       timespec64_add_ns(&(stat->atime),tvnsecchange);
+       timespec64_add_ns(&(stat->mtime),tvnsecchange);
+       timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+
+    }
+    else if(strcmp(buf,"/linkerconfig/com.android.art/ld.config.txt")==0){
+      timespec64_add_ns(&(stat->atime),tvnsecchange);
+      timespec64_add_ns(&(stat->mtime),tvnsecchange);
+      timespec64_add_ns(&(stat->ctime),tvnsecchange);
+      stat->atime.tv_sec-=timeaa%10000;
+
+    }
+    else if(strcmp(buf,"/linkerconfig/ld.config.txt")==0){
+        timespec64_add_ns(&(stat->atime),tvnsecchange);
+        timespec64_add_ns(&(stat->mtime),tvnsecchange);
+        timespec64_add_ns(&(stat->ctime),tvnsecchange);
+       stat->atime.tv_sec-=timeaa;
+    }
+    else if(strcmp(buf,"/apex/apex-info-list.xml")==0){
+        timespec64_add_ns(&(stat->atime),tvnsecchange);
+        timespec64_add_ns(&(stat->mtime),tvnsecchange);
+        timespec64_add_ns(&(stat->ctime),tvnsecchange);
+        stat->atime.tv_sec-=timeaa;
+    }
+    else if(strcmp(buf,"/mnt/expand")==0){//mei
+        timespec64_add_ns(&(stat->atime),tvnsecchange);
+        timespec64_add_ns(&(stat->mtime),tvnsecchange);
+        timespec64_add_ns(&(stat->ctime),tvnsecchange);
+        stat->atime.tv_sec-=timeaa;
+        //printk(KERN_INFO "changed    %s \n",buf);
+    }
+    else if(strcmp(buf,"/dev/__properties__/properties_serial")==0){
+        timespec64_add_ns(&(stat->atime),tvnsecchange);
+        timespec64_add_ns(&(stat->mtime),tvnsecchange);
+        timespec64_add_ns(&(stat->ctime),tvnsecchange);
+        stat->atime.tv_sec-=timeaa;
+    }
+    else if(strcmp(buf,"/dev/__properties__/property_info")==0){
+        timespec64_add_ns(&(stat->atime),tvnsecchange);
+        timespec64_add_ns(&(stat->mtime),tvnsecchange);
+        timespec64_add_ns(&(stat->ctime),tvnsecchange);
+        stat->atime.tv_sec-=timeaa;
+
+    }
+    else if(strcmp(buf,"/proc/sys/kernel/random/boot_id")==0){
+        timespec64_add_ns(&(stat->atime),tvnsecchange);
+        timespec64_add_ns(&(stat->mtime),tvnsecchange);
+        timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+
+    }
+    else if(strcmp(buf,"/dev/usb_accessory")==0){//mei
+        timespec64_add_ns(&(stat->atime),tvnsecchange);
+        timespec64_add_ns(&(stat->mtime),tvnsecchange);
+        timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+        //printk(KERN_INFO "changed    %s \n",buf);
+
+    }
+    else if(strcmp(buf,"/dev")==0||strcmp(buf,"/dev/")==0){//mei
+
+        //printk(KERN_INFO "vfs_kern_mount timeaa %d  \n",timeaa);
+       timespec64_add_ns(&(stat->atime),tvnsecchange);
+       timespec64_add_ns(&(stat->mtime),tvnsecchange);
+       timespec64_add_ns(&(stat->ctime),tvnsecchange);
+       stat->atime.tv_sec-=timeaa;
+       stat->mtime.tv_sec-=timeaa;
+       stat->ctime.tv_sec-=timeaa;
+       //printk(KERN_INFO "changed    %s \n",buf);
+
+     }
+     else if(strcmp(buf,"/data")==0){
+
+        //printk(KERN_INFO "vfs_kern_mount timeaa %d  \n",timeaa);
+       timespec64_add_ns(&(stat->mtime),tvnsecchange);
+       timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+       stat->mtime.tv_sec-=timeaa;
+       stat->ctime.tv_sec-=timeaa;
+
+
+     }
+
+else if(strcmp(buf,"/data/misc/ethernet")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/misc/keychain")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/misc/user")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+       stat->mtime.tv_sec-=timeaa;
+       stat->ctime=stat->mtime;
+
+}
+else if(strcmp(buf,"/data/misc/user/0")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime=stat->mtime=stat->atime;
+//dump_stack();
+
+}
+else if(strcmp(buf,"/data/misc/zoneinfo")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/app-lib")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/system/ifw")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime=stat->mtime=stat->atime;
+
+}
+else if(strcmp(buf,"/data/system/install_sessions")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+//dump_stack();
+
+}
+else if(strcmp(buf,"/data/system/users/userlist.xml")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime=stat->mtime=stat->atime;
+//dump_stack();
+}
+else if(strcmp(buf,"/data/system/uiderrors.txt")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime=stat->mtime=stat->atime;
+
+
+}
+else if(strcmp(buf,"/data/data/com.android.shell")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/data/com.google.android.webview")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/data/com.google.android.gms")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+
+
+
+
+else if(strcmp(buf,"/data/system/sensor_service")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime=stat->mtime=stat->atime;
+
+
+}
+else if(strcmp(buf,"/data/user")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/user/0")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime.tv_sec-=timeaa;
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/data")==0||strcmp(buf,"/data/data/")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime.tv_sec-=timeaa;
+stat->mtime=stat->ctime;
+
+}
+else if(strcmp(buf,"/data/local")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/local/tmp")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/dalvik-cache")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+stat->ctime.tv_sec+=2;
+stat->mtime=stat->ctime;
+
+}
+else if(strcmp(buf,"/data/system_ce")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/misc_de/0")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/misc_ce/0")==0){
+stat->atime.tv_sec=misc_keystore_msec+8;
+stat->atime.tv_nsec=misc_keystore_mnsec;
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+
+
+  stat->ctime=stat->mtime=stat->atime;
+
+}
+else if(strcmp(buf,"/data/rollback-observer")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime.tv_sec-=timeaa;
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/misc/profiles/ref")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime.tv_sec-=timeaa;
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/resource-cache")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime.tv_sec-=timeaa;
+stat->mtime=stat->ctime;
+}
+
+else if(strcmp(buf,"/data/resource-cache/product@overlay@GmsCnConfigOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@GoogleExtServicesConfigOverlayCn.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@VoiceAssistAndroidOverlay@VoiceAssistAndroidOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@MiuiFrameworkResOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@GestureLineOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@DevicesAndroidOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@AospFrameworkResOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/vendor@overlay@FrameworksResTarget.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@MiuiHomeLauncherResOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@FrameworksResCommon_Sys.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@MiuiServiceOverlay@MiuiServiceOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/com.android.systemui-neutral-BHic.frro")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/com.android.systemui-accent-m0v0.frro")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/data@resource-cache@com.android.systemui-neutral-BHic.frro@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/data@resource-cache@com.android.systemui-accent-m0v0.frro@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@GmsCnSettingsOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@SettingsResCommon_Sys.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@SettingsRroDeviceTypeOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@SettingsRroDeviceConfigOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@SettingsRroDeviceHideStatusBarOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime=stat->mtime=stat->atime;}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@SettingsResourceOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@GmsCnSystemUIOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@SystemUIResCommon_Sys.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@DevicesOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@MccMncOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@ProvisionResourceOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@GmsCnTelecommOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@GmsMiCSPTelecommOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@TelecommResCommon_Sys.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@MiuiTelecomOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@GmsSettingProviderOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@NetworkStackOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@MiuiInputSettingsOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@GmsMiCSPTelephonyOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@TelephonyResCommon_Sys.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@MiuiStkResOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@MiuiBtRRODeviceConfigOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@WallpaperOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@GmsContactProviderOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@WifiResCommon_Sys.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/vendor@overlay@WifiResTarget.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/resource-cache/product@overlay@AospWifiResOverlay.apk@idmap")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+}
+else if(strcmp(buf,"/data/system/netstats")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+
+
+}
+
+else if(strcmp(buf,"/data/system/watchlist_settings.xml")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->ctime=stat->mtime=stat->atime;
+
+
+}
+
+else if(strcmp(buf,"/data/system/locksettings.db-journal")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+ stat->ctime=stat->mtime=stat->atime;
+
+}
+
+else if(strcmp(buf,"/data/system")==0){
+
+    timespec64_add_ns(&(stat->atime),tvnsecchange);
+    timespec64_add_ns(&(stat->mtime),tvnsecchange);
+    timespec64_add_ns(&(stat->ctime),tvnsecchange);
+    stat->mtime.tv_sec-=randmacnum%1000;
+    stat->ctime.tv_sec-=randmacnum%1000;
+
+}
+else if(strcmp(buf,"/data/system/users/0")==0){
+    timespec64_add_ns(&(stat->atime),tvnsecchange);
+    timespec64_add_ns(&(stat->mtime),tvnsecchange);
+    timespec64_add_ns(&(stat->ctime),tvnsecchange);
+        stat->mtime.tv_sec-=randmacnum%1000;
+        stat->ctime.tv_sec-=randmacnum%1000;
+
+}
+else if(strcmp(buf,"/data/system/job")==0){
+    timespec64_add_ns(&(stat->atime),tvnsecchange);
+    timespec64_add_ns(&(stat->mtime),tvnsecchange);
+    timespec64_add_ns(&(stat->ctime),tvnsecchange);
+            stat->mtime.tv_sec-=randmacnum%1000;
+            stat->ctime=stat->mtime;
+}
+else if(strcmp(buf,"/data/system/procstats")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime=stat->mtime;
+
+
+}
+else if(strcmp(buf,"/data/system/entropy.dat")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/data/system/device_policies.xml")==0){
+              timespec64_add_ns(&(stat->atime),tvnsecchange);
+              timespec64_add_ns(&(stat->mtime),tvnsecchange);
+              timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+              if(stat->mtime.tv_sec>1740526927){
+
+                   stat->mtime.tv_sec-=randmacnum%10000000;
+                   stat->mtime.tv_sec-=8640000;
+                   stat->atime=stat->ctime=stat->mtime;
+              }
+
+
+
+}
+
+else if(strcmp(buf,"/data/system/blobstore")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+
+              if(stat->atime.tv_sec>1740526927){
+
+                   stat->atime.tv_sec-=randmacnum%10000000;
+                   stat->atime.tv_sec-=8640000;
+
+              }
+
+              if(stat->mtime.tv_sec>1740526927){
+
+                   stat->mtime.tv_sec-=randmacnum%10000000;
+                   stat->mtime.tv_sec-=8640000;
+                   stat->ctime=stat->mtime;
+              }
+
+
+}
+else if(strcmp(buf,"/data/system/graphicsstats")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+              if(stat->mtime.tv_sec>1740526927){
+
+                   stat->mtime.tv_sec-=randmacnum%10000000;
+                   stat->mtime.tv_sec-=8640000;
+                   stat->ctime=stat->mtime;
+              }
+
+
+}
+else if(strcmp(buf,"/data/misc")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+              if(stat->mtime.tv_sec>1740526927){
+
+                   stat->mtime.tv_sec-=randmacnum%10000000;
+                   stat->mtime.tv_sec-=8640000;
+                   stat->ctime=stat->mtime;
+              }
+
+}
+
+else if(strcmp(buf,"/data/dalvik-cache/arm")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/data/dalvik-cache/arm64")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/data/system/recoverablekeystore.db")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/data/system/locksettings.db")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->ctime.tv_sec-=timeaa;
+               stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/resource-cache")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/system/theme")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);}
+else if(strcmp(buf,"/data/system/users")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/data/system/sync")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime=stat->mtime;
+
+}
+else if(strcmp(buf,"/data/system/last-header.txt")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime=stat->mtime;
+
+
+
+}
+else if(strcmp(buf,"/data/misc/shared_relro/libwebviewchromium32.relro")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/data/misc/shared_relro/libwebviewchromium64.relro")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/data/system/package-cstats.list")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/data/system/package-usage.list")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/data/system/packages.xml")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+
+
+
+else if(strcmp(buf,"/data/app")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+}
+
+
+else if(strcmp(buf,"/data/app/MIUISoundRecorderTargetSdk30/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/MIUIScreenRecorder/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/com.iflytek.inputmethod.miui/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/BaiduIME/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/MIUIWeather/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/MiuiScanner/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/MIUIVirtualSim/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/ThirdAppAssistant/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/MIUINewHome_Removable/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/MIUIHuanji/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/Health/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/MIUIMiDrive/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/wps-lite/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/SmartHome/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/MIUIVipAccount/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/MIUICleanMaster/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/MIGalleryLockscreen-MIUI15/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/app/MIUIXiaoAiSpeechEngine/base.apk")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime=stat->ctime;
+}
+else if(strcmp(buf,"/data/system/migt/migt")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+
+
+ stat->mtime.tv_sec-=timeaa;
+stat->ctime=stat->mtime;
+}
+else if(strcmp(buf,"/data/system/mcd/df")==0){
+
+timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+ stat->mtime.tv_sec-=timeaa;
+stat->ctime=stat->mtime;
+
+}
+else if(strcmp(buf,"/data/system/last-fstrim")==0){
+
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+stat->ctime=stat->mtime=stat->atime;
+
+}
+else if(strcmp(buf,"/sys/block")==0){
+   timespec64_add_ns(&(stat->atime),tvnsecchange);
+   timespec64_add_ns(&(stat->mtime),tvnsecchange);
+   timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+   }
+else if(strcmp(buf,"/sys/bus/pci/devices")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+
+}
+else if(strcmp(buf,"/sys/bus/usb/devices")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/module/snd_timer")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+
+
+}
+else if(strcmp(buf,"/sys/module/rfkill")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+}
+else if(strcmp(buf,"/sys/class/i2c-dev")==0){//mei
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+//printk(KERN_INFO "changed    %s \n",buf);
+}
+else if(strcmp(buf,"/sys/bus/spi")==0){//mei
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+//printk(KERN_INFO "changed    %s \n",buf);
+}
+else if(strcmp(buf,"/sys/devices/virtual/bdi/8:16")==0){//mei
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+//printk(KERN_INFO "changed    %s \n",buf);
+}
+else if(strcmp(buf,"/sys/devices/virtual/ppp")==0){//mei
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+//printk(KERN_INFO "changed    %s \n",buf);
+
+}
+else if(strcmp(buf,"/sys/fs/cgroup")==0){//mei
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+//printk(KERN_INFO "changed    %s \n",buf);
+
+}
+else if(strcmp(buf,"/sys/fs/bpf")==0){//mei
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+//printk(KERN_INFO "changed    %s \n",buf);
+
+}
+else if(strcmp(buf,"/sys/fs/fuse/connections")==0){//mei
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+ stat->atime.tv_sec-=timeaa;
+//printk(KERN_INFO "changed    %s \n",buf);
+}
+else if(strcmp(buf,"/sys/class/net")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+ stat->atime.tv_sec-=timeaa;
+ stat->mtime=stat->ctime=stat->atime;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+ stat->atime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/class/devfreq")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+ stat->atime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_max_freq")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpufreq/policy4/cpuinfo_max_freq")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpufreq/policy7/cpuinfo_max_freq")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/possible")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/present")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu0/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu1/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu2/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu3/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu4/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu5/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu6/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa; }
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu7/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/virtual/thermal/thermal_zone0/temp")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/virtual/thermal/thermal_zone1/temp")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/virtual/thermal/thermal_zone2/temp")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/virtual/thermal/thermal_zone3/temp")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/virtual/thermal/thermal_zone4/temp")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/virtual/thermal/thermal_zone5/temp")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/virtual/thermal/thermal_zone6/temp")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/virtual/thermal/thermal_zone7/temp")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpufreq/policy0/stats/time_in_state")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpufreq/policy7/stats/time_in_state")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu0/cpuidle/state0/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu4/cpuidle/state0/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu2/cpuidle/state1/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu7/cpuidle/state1/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu1/cpuidle/state0/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu5/cpuidle/state0/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu4/cpuidle/state1/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu3/cpuidle/state1/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu2/cpuidle/state0/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu6/cpuidle/state0/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu1/cpuidle/state1/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu5/cpuidle/state1/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu3/cpuidle/state0/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu7/cpuidle/state0/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu0/cpuidle/state1/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu6/cpuidle/state1/time")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpufreq/policy4/stats/time_in_state")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu0/regs/identification/midr_el1")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu1/regs/identification/midr_el1")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu2/regs/identification/midr_el1")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu3/regs/identification/midr_el1")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu4/regs/identification/midr_el1")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu5/regs/identification/midr_el1")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu6/regs/identification/midr_el1")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+
+}
+else if(strcmp(buf,"/sys/devices/system/cpu/cpu7/regs/identification/midr_el1")==0){
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+               stat->atime.tv_sec-=timeaa;
+               stat->mtime.tv_sec-=timeaa;
+               stat->ctime.tv_sec-=timeaa;
+}
+
+
+}
 /**
  * vfs_getattr_nosec - getattr without security checks
  * @path: file to get attributes from
@@ -154,11 +1273,16 @@ int vfs_getattr(const struct path *path, struct kstat *stat,
 		u32 request_mask, unsigned int query_flags)
 {
 	int retval;
-
+    char *buffer, *pathn;
+    buffer = (char *)__get_free_page(GFP_KERNEL);
+    pathn = d_path(path, buffer, PAGE_SIZE);
 	retval = security_inode_getattr(path);
 	if (retval)
 		return retval;
-	return vfs_getattr_nosec(path, stat, request_mask, query_flags);
+	retval=vfs_getattr_nosec(path, stat, request_mask, query_flags);
+    patch_shmemstat(pathn,stat);
+    free_page((unsigned long)buffer);
+    return retval;
 }
 EXPORT_SYMBOL(vfs_getattr);
 
