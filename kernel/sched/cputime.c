@@ -241,7 +241,7 @@ void account_idle_time(u64 cputime)
 		cpustat[CPUTIME_IOWAIT] += cputime;}
 	else{
 		cpustat[CPUTIME_IDLE] += cputime;
-        if(<0){
+        if(changed<0){
              cpustat[CPUTIME_IDLE] += timeaa*3*1000000000LL;
              changed=1;
         }
