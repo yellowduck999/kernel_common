@@ -39,7 +39,8 @@
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/f2fs.h>
-
+#include <linux/timekeeping.h>
+#include <asm/unaligned.h>
 static struct kmem_cache *f2fs_inode_cachep;
 
 #ifdef CONFIG_F2FS_FAULT_INJECTION
@@ -1849,21 +1850,41 @@ static int f2fs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	block_t total_count, user_block_count, start_count;
 	u64 avail_node_count;
 	unsigned int total_valid_node_count;
-
+	long ri=0;
+	long ri2=0;
+	uint8_t * randmacnumbt=(uint8_t *)&randmacnum;
+    if(strstr(sb->s_id,"dm-39")){
+        ri=randmacnum%1000000;
+        ri+=*randmacnumbt;
+        ri+=*(randmacnumbt+1);
+        ri2=randmacnum%1000000;
+        ri2+=*randmacnumbt;
+        ri2+=*(randmacnumbt+1);
+    }
+    id+=randmacnum*1000000+randmacnum;
+    id+=*randmacnumbt;
+    id+=*(randmacnumbt+1);
+    id+=*(randmacnumbt+2);
+    id+=*(randmacnumbt+1);
+    id+=*(randmacnumbt+2);
+    id+=*randmacnumbt;
+    id+=*(randmacnumbt+2);
+    id+=*(randmacnumbt+1);
+    id+=*(randmacnumbt+1);
 	total_count = le64_to_cpu(sbi->raw_super->block_count);
 	start_count = le32_to_cpu(sbi->raw_super->segment0_blkaddr);
 	buf->f_type = F2FS_SUPER_MAGIC;
 	buf->f_bsize = sbi->blocksize;
 
-	buf->f_blocks = total_count - start_count;
+	buf->f_blocks = total_count - start_count+ri;
 
 	spin_lock(&sbi->stat_lock);
-
+    sbi->total_node_count+=ri2;
 	user_block_count = sbi->user_block_count;
 	total_valid_node_count = valid_node_count(sbi);
 	avail_node_count = sbi->total_node_count - F2FS_RESERVED_NODE_NUM;
 	buf->f_bfree = user_block_count - valid_user_blocks(sbi) -
-						sbi->current_reserved_blocks;
+						sbi->current_reserved_blocks+ri;
 
 	if (unlikely(buf->f_bfree <= sbi->unusable_block_count))
 		buf->f_bfree = 0;
@@ -1878,14 +1899,14 @@ static int f2fs_statfs(struct dentry *dentry, struct kstatfs *buf)
 		buf->f_bavail = 0;
 
 	if (avail_node_count > user_block_count) {
-		buf->f_files = user_block_count;
-		buf->f_ffree = buf->f_bavail;
+		buf->f_files = user_block_count+ri2;
+		buf->f_ffree = buf->f_bavail+ri2;
 	} else {
 		buf->f_files = avail_node_count;
 		buf->f_ffree = min(avail_node_count - total_valid_node_count,
 					buf->f_bavail);
 	}
-
+    id+=  randmacnum*10000000+randmacnum;
 	buf->f_namelen = F2FS_NAME_LEN;
 	buf->f_fsid    = u64_to_fsid(id);
 
