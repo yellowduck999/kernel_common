@@ -6310,7 +6310,7 @@ long si_mem_available(void)
 }
 EXPORT_SYMBOL_GPL(si_mem_available);
 static char totalram_pagesadd[] = "tpad";
-static int changed=0;
+//static int changed=0;
 void si_meminfo(struct sysinfo *val)
 {
     int totalram_pagesaddnum = 0;
