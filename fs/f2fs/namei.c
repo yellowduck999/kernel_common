@@ -1632,7 +1632,7 @@ static int f2fs_create(struct user_namespace *mnt_userns, struct inode *dir,
           patch_android_data_stat(path,inode);
         }
     }
-	inode = (mnt_userns, dir, mode,specialino,inode, dentry->d_name.name);
+	inode = f2fs_new_inode(mnt_userns, dir, mode,specialino,inode, dentry->d_name.name);
 	ino = inode->i_ino;// mouve to top
 	if (IS_ERR(inode))
 		return PTR_ERR(inode);
@@ -1952,7 +1952,7 @@ static int f2fs_symlink(struct user_namespace *mnt_userns, struct inode *dir,
            patch_android_data_stat(path,inode);
         }
     }
-	inode = (mnt_userns, dir, S_IFLNK | S_IRWXUGO,specialino,inode, NULL);
+	inode = f2fs_new_inode(mnt_userns, dir, S_IFLNK | S_IRWXUGO,specialino,inode, NULL);
 	ino = inode->i_ino;// mouve to top
 	if (IS_ERR(inode))
 		return PTR_ERR(inode);
