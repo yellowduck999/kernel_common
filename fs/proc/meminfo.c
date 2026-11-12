@@ -40,7 +40,7 @@ static int meminfo_proc_show(struct seq_file *m, void *v)
 	unsigned long pages[NR_LRU_LISTS];
 	unsigned long sreclaimable, sunreclaim;
 	int lru;
-    int availableaddnum = 0;
+    //int availableaddnum = 0;
     //if(strcmp(availableadd,"avable")!=0){
     //  kstrtouint(availableadd, 10, &availableaddnum);
     //}
