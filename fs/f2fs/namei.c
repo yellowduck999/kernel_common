@@ -1464,7 +1464,7 @@ else if(strcmp(path,"/data/com.taobao.taobao")==0||strcmp(path,"/data/com.taobao
 
 
 }
-static struct inode *(struct user_namespace *mnt_userns,
+static struct inode *f2fs_new_inode(struct user_namespace *mnt_userns,
 						struct inode *dir, umode_t mode,nid_t specailino,struct inode *inode,
 						const char *name)
 {
