@@ -1580,18 +1580,18 @@ static struct inode *f2fs_new_inode(struct user_namespace *mnt_userns,
 
 	f2fs_init_extent_tree(inode);
 
-	trace_(inode, 0);
+	trace_f2fs_new_inode(inode, 0);
 	return inode;
 
 fail:
-	trace_(inode, err);
+	trace_f2fs_new_inode(inode, err);
 	make_bad_inode(inode);
 	if (nid_free)
 		set_inode_flag(inode, FI_FREE_NID);
 	iput(inode);
 	return ERR_PTR(err);
 fail_drop:
-	trace_(inode, err);
+	trace_f2fs_new_inode(inode, err);
 	dquot_drop(inode);
 	inode->i_flags |= S_NOQUOTA;
 	make_bad_inode(inode);
