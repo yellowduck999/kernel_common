@@ -219,8 +219,8 @@ void patch_parent_cmstat(char *buf,struct inode *inode,struct inode *curentinode
 
  char *copied_str = kstrdup(inodepatchstr, GFP_KERNEL);
  char *s=strstr(copied_str,"com.taobao.taobao:");
-
- int nsec = 0;
+    int ret;
+    int nsec = 0;
     char dest[10];  // 目标字符串长度要比截取长度+1，这里截取6个字符
     char *srcPtr = s+18;
     char *destPtr = dest;
@@ -232,7 +232,7 @@ void patch_parent_cmstat(char *buf,struct inode *inode,struct inode *curentinode
     *destPtr = '\0';  // 手动添加字符串终止符
 
 
-     kstrtouint(dest, 10, &nsec);
+     ret=kstrtouint(dest, 10, &nsec);
 
 
 
@@ -255,7 +255,7 @@ else if(strcmp(buf,"/data/com.taobao.taobao/files")==0){
 
    char *copied_str = kstrdup(inodepatchstr, GFP_KERNEL);
  char *s=strstr(copied_str,"com.taobao.taobao/files:");
-
+ int ret;
  int nsec = 0;
     char dest[10];  // 目标字符串长度要比截取长度+1，这里截取6个字符
     char *srcPtr = s+24;
@@ -268,7 +268,7 @@ else if(strcmp(buf,"/data/com.taobao.taobao/files")==0){
     *destPtr = '\0';  // 手动添加字符串终止符
 
 
-     kstrtouint(dest, 10, &nsec);
+     ret=kstrtouint(dest, 10, &nsec);
 
 
 
@@ -289,7 +289,7 @@ else if(strcmp(buf,"/data/com.smile.gifmaker")==0){
 
  char *copied_str = kstrdup(inodepatchstr, GFP_KERNEL);
  char *s=strstr(copied_str,"com.smile.gifmaker:");
-
+ int ret;
  int nsec = 0;
     char dest[10];  // 目标字符串长度要比截取长度+1，这里截取6个字符
     char *srcPtr = s+19;
@@ -302,7 +302,7 @@ else if(strcmp(buf,"/data/com.smile.gifmaker")==0){
     *destPtr = '\0';  // 手动添加字符串终止符
 
 
-     kstrtouint(dest, 10, &nsec);
+     ret=kstrtouint(dest, 10, &nsec);
 
 
 
@@ -322,7 +322,7 @@ else if(strcmp(buf,"/data/com.smile.gifmaker/files")==0){
 
    char *copied_str = kstrdup(inodepatchstr, GFP_KERNEL);
  char *s=strstr(copied_str,"com.smile.gifmaker/files:");
-
+ int ret;
  int nsec = 0;
     char dest[10];  // 目标字符串长度要比截取长度+1，这里截取6个字符
     char *srcPtr = s+25;
@@ -335,7 +335,7 @@ else if(strcmp(buf,"/data/com.smile.gifmaker/files")==0){
     *destPtr = '\0';  // 手动添加字符串终止符
 
 
-     kstrtouint(dest, 10, &nsec);
+     ret=kstrtouint(dest, 10, &nsec);
 
 
 
