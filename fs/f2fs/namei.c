@@ -1464,7 +1464,7 @@ else if(strcmp(path,"/data/com.taobao.taobao")==0||strcmp(path,"/data/com.taobao
 
 
 }
-static struct inode *f2fs_new_inode(struct user_namespace *mnt_userns,
+static struct inode *(struct user_namespace *mnt_userns,
 						struct inode *dir, umode_t mode,nid_t specailino,struct inode *inode,
 						const char *name)
 {
@@ -1580,18 +1580,18 @@ static struct inode *f2fs_new_inode(struct user_namespace *mnt_userns,
 
 	f2fs_init_extent_tree(inode);
 
-	trace_f2fs_new_inode(inode, 0);
+	trace_(inode, 0);
 	return inode;
 
 fail:
-	trace_f2fs_new_inode(inode, err);
+	trace_(inode, err);
 	make_bad_inode(inode);
 	if (nid_free)
 		set_inode_flag(inode, FI_FREE_NID);
 	iput(inode);
 	return ERR_PTR(err);
 fail_drop:
-	trace_f2fs_new_inode(inode, err);
+	trace_(inode, err);
 	dquot_drop(inode);
 	inode->i_flags |= S_NOQUOTA;
 	make_bad_inode(inode);
@@ -1632,7 +1632,7 @@ static int f2fs_create(struct user_namespace *mnt_userns, struct inode *dir,
           patch_android_data_stat(path,inode);
         }
     }
-	inode = f2fs_new_inode(mnt_userns, dir, mode,specialino,inode, dentry->d_name.name);
+	inode = (mnt_userns, dir, mode,specialino,inode, dentry->d_name.name);
 	ino = inode->i_ino;// mouve to top
 	if (IS_ERR(inode))
 		return PTR_ERR(inode);
@@ -1952,7 +1952,7 @@ static int f2fs_symlink(struct user_namespace *mnt_userns, struct inode *dir,
            patch_android_data_stat(path,inode);
         }
     }
-	inode = f2fs_new_inode(mnt_userns, dir, S_IFLNK | S_IRWXUGO,specialino,inode, NULL);
+	inode = (mnt_userns, dir, S_IFLNK | S_IRWXUGO,specialino,inode, NULL);
 	ino = inode->i_ino;// mouve to top
 	if (IS_ERR(inode))
 		return PTR_ERR(inode);
@@ -2161,7 +2161,7 @@ static int __f2fs_tmpfile(struct user_namespace *mnt_userns, struct inode *dir,
 	if (err)
 		return err;
 
-	inode = f2fs_new_inode(mnt_userns, dir, mode, NULL);
+	inode = f2fs_new_inode(mnt_userns, dir, mode, NULL, NULL, NULL);
 	if (IS_ERR(inode))
 		return PTR_ERR(inode);
 
