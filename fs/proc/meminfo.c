@@ -30,7 +30,7 @@ static void show_val_kb(struct seq_file *m, const char *s, unsigned long num)
 	seq_put_decimal_ull_width(m, s, num << (PAGE_SHIFT - 10), 8);
 	seq_write(m, " kB\n", 4);
 }
-static char availableadd[] = "avable";
+//static char availableadd[] = "avable";
 static int meminfo_proc_show(struct seq_file *m, void *v)
 {
 	struct sysinfo i;
