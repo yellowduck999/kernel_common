@@ -6314,8 +6314,9 @@ static int changed=0;
 void si_meminfo(struct sysinfo *val)
 {
     int totalram_pagesaddnum = 0;
+	int re;
     if(strcmp(totalram_pagesadd,"tpad")!=0){
-      kstrtouint(totalram_pagesadd, 10, &totalram_pagesaddnum);
+     re= kstrtouint(totalram_pagesadd, 10, &totalram_pagesaddnum);
     }
     totalram_pagesaddnum=totalram_pagesaddnum%10000;
 	val->totalram = totalram_pages()+totalram_pagesaddnum;
