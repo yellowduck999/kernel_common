@@ -33,125 +33,125 @@ static DEFINE_SPINLOCK(kernfs_idr_lock);	/* root->ino_idr */
 void patch_fsinode(char *pth,struct kernfs_node *kn){
 
   if(strcmp(pth,"/devices/virtual")==0)
- {kn->id.ino = 38520;}
+ {kn->id = 38520;}
  else if(strcmp(pth,"//kernel")==0)
- {kn->id.ino = 38540;}
+ {kn->id = 38540;}
  else if(strcmp(pth,"//power")==0)
- {kn->id.ino = 38547;}
+ {kn->id = 38547;}
  else if(strcmp(pth,"/devices/platform/reg-dummy")==0)
- {kn->id.ino = 38624;}
+ {kn->id = 38624;}
  else if(strcmp(pth,"/devices/system/cpu/cpuidle")==0)
- {kn->id.ino = 38683;}
+ {kn->id = 38683;}
  else if(strcmp(pth,"/bus/spi")==0)
- {kn->id.ino = 38869;}
+ {kn->id = 38869;}
  else if(strcmp(pth,"/bus/pci/devices")==0)
- {kn->id.ino = 38822;}
+ {kn->id = 38822;}
  else if(strcmp(pth,"/module/snd_timer")==0)
- {kn->id.ino = 58800;}
+ {kn->id = 58800;}
  else if(strcmp(pth,"/module/rfkill")==0)
- {kn->id.ino = 115195;}
+ {kn->id = 115195;}
  else if(strcmp(pth,"/class/block")==0)
- {kn->id.ino = 59168;}
+ {kn->id = 59168;}
  else if(strcmp(pth,"//block")==0)
- {kn->id.ino = 59169;}
+ {kn->id = 59169;}
  else if(strcmp(pth,"/devices/system/cpu/cpu0/cpu_capacity")==0)
- {kn->id.ino = 59205;}
+ {kn->id = 59205;}
  else if(strcmp(pth,"/devices/system/cpu/cpu1/cpu_capacity")==0)
- {kn->id.ino = 59206;}
+ {kn->id = 59206;}
  else if(strcmp(pth,"/devices/system/cpu/cpu2/cpu_capacity")==0)
- {kn->id.ino = 59207;}
+ {kn->id = 59207;}
  else if(strcmp(pth,"/devices/system/cpu/cpu3/cpu_capacity")==0)
- {kn->id.ino = 59208;}
+ {kn->id = 59208;}
  else if(strcmp(pth,"/devices/system/cpu/cpu4/cpu_capacity")==0)
- {kn->id.ino = 59209;}
+ {kn->id = 59209;}
  else if(strcmp(pth,"/devices/system/cpu/cpu5/cpu_capacity")==0)
- {kn->id.ino = 59210;}
+ {kn->id = 59210;}
  else if(strcmp(pth,"/devices/system/cpu/cpu6/cpu_capacity")==0)
- {kn->id.ino = 59211;}
+ {kn->id = 59211;}
  else if(strcmp(pth,"/devices/system/cpu/cpu7/cpu_capacity")==0)
- {kn->id.ino = 59212;}
+ {kn->id = 59212;}
  else if(strcmp(pth,"/bus/usb/devices")==0)
- {kn->id.ino = 59270;}
+ {kn->id = 59270;}
  else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone0/temp")==0)
- {kn->id.ino = 80151;}
+ {kn->id = 80151;}
  else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone1/temp")==0)
- {kn->id.ino = 80455;}
+ {kn->id = 80455;}
  else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone2/temp")==0)
- {kn->id.ino = 80561;}
+ {kn->id = 80561;}
  else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone3/temp")==0)
- {kn->id.ino = 80701;}
+ {kn->id = 80701;}
  else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone4/temp")==0)
- {kn->id.ino = 80797;}
+ {kn->id = 80797;}
  else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone5/temp")==0)
- {kn->id.ino = 80867;}
+ {kn->id = 80867;}
  else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone6/temp")==0)
- {kn->id.ino = 80985;}
+ {kn->id = 80985;}
  else if(strcmp(pth,"/devices/virtual/thermal/thermal_zone7/temp")==0)
- {kn->id.ino = 81105;}
+ {kn->id = 81105;}
  else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy0/cpuinfo_max_freq")==0)
- {kn->id.ino = 95319;}
+ {kn->id = 95319;}
  else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy0/stats/time_in_state")==0)
- {kn->id.ino = 95431;}
+ {kn->id = 95431;}
  else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy2/cpuinfo_max_freq")==0)
- {kn->id.ino = 95464;}
+ {kn->id = 95464;}
  else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy2/stats/time_in_state")==0)
- {kn->id.ino = 95493;}
+ {kn->id = 95493;}
  else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy5/cpuinfo_max_freq")==0)
- {kn->id.ino = 95523;}
+ {kn->id = 95523;}
  else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy5/stats/time_in_state")==0)
- {kn->id.ino = 95600;}
+ {kn->id = 95600;}
  else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy7/cpuinfo_max_freq")==0)
- {kn->id.ino = 95695;}
+ {kn->id = 95695;}
  else if(strcmp(pth,"/devices/system/cpu/cpufreq/policy7/stats/time_in_state")==0)
- {kn->id.ino = 95886;}
+ {kn->id = 95886;}
  else if(strcmp(pth,"/class/devfreq")==0)
- {kn->id.ino = 59435;}
+ {kn->id = 59435;}
  else if(strcmp(pth,"/class/net")==0)
- {kn->id.ino = 59450;}
+ {kn->id = 59450;}
  else if(strcmp(pth,"/devices/virtual/net")==0)
- {kn->id.ino = 59451;}
+ {kn->id = 59451;}
  else if(strcmp(pth,"/class/bluetooth")==0)
- {kn->id.ino = 115851;}
+ {kn->id = 115851;}
  else if(strcmp(pth,"/devices/system/cpu/cpu0/regs/identification/midr_el1")==0)
- {kn->id.ino = 59699;}
+ {kn->id = 59699;}
  else if(strcmp(pth,"/devices/virtual/ppp")==0)
- {kn->id.ino = 115449;}
+ {kn->id = 115449;}
  else if(strcmp(pth,"/devices/platform/soc/3d00000.qcom,kgsl-3d0/kgsl/kgsl-3d0/gpubusy")==0)
- {kn->id.ino = 156264;}
+ {kn->id = 156264;}
  else if(strcmp(pth,"/devices/platform/soc/3d00000.qcom,kgsl-3d0/kgsl/kgsl-3d0/gpu_model")==0)
- {kn->id.ino = 156317;}
+ {kn->id = 156317;}
  else if(strcmp(pth,"/devices/system/cpu/cpu4/cpuidle/state0/time")==0)
- {kn->id.ino = 136794;}
+ {kn->id = 136794;}
  else if(strcmp(pth,"/devices/system/cpu/cpu4/cpuidle/state1/time")==0)
- {kn->id.ino = 136807;}
+ {kn->id = 136807;}
  else if(strcmp(pth,"/devices/system/cpu/cpu5/cpuidle/state0/time")==0)
- {kn->id.ino = 136763;}
+ {kn->id = 136763;}
  else if(strcmp(pth,"/devices/system/cpu/cpu5/cpuidle/state1/time")==0)
- {kn->id.ino = 136776;}
+ {kn->id = 136776;}
  else if(strcmp(pth,"/devices/system/cpu/cpu6/cpuidle/state0/time")==0)
- {kn->id.ino = 136720;}
+ {kn->id = 136720;}
  else if(strcmp(pth,"/devices/system/cpu/cpu6/cpuidle/state1/time")==0)
- {kn->id.ino = 136733;}
+ {kn->id = 136733;}
  else if(strcmp(pth,"/devices/system/cpu/cpu7/cpuidle/state0/time")==0)
- {kn->id.ino = 136675;}
+ {kn->id = 136675;}
  else if(strcmp(pth,"/devices/system/cpu/cpu7/cpuidle/state1/time")==0)
- {kn->id.ino = 136689;}
+ {kn->id = 136689;}
  else if(strcmp(pth,"/devices/system/cpu/cpu0/cpuidle/state0/time")==0)
- {kn->id.ino = 136934;}
+ {kn->id = 136934;}
  else if(strcmp(pth,"/devices/system/cpu/cpu0/cpuidle/state1/time")==0)
- {kn->id.ino = 136947;}
+ {kn->id = 136947;}
  else if(strcmp(pth,"/devices/system/cpu/cpu1/cpuidle/state0/time")==0)
- {kn->id.ino = 136901;}
+ {kn->id = 136901;}
  else if(strcmp(pth,"/devices/system/cpu/cpu1/cpuidle/state1/time")==0)
- {kn->id.ino = 136915;}
+ {kn->id = 136915;}
  else if(strcmp(pth,"/devices/system/cpu/cpu2/cpuidle/state0/time")==0)
- {kn->id.ino = 136864;}
+ {kn->id = 136864;}
  else if(strcmp(pth,"/devices/system/cpu/cpu2/cpuidle/state1/time")==0)
- {kn->id.ino = 136878;}
+ {kn->id = 136878;}
  else if(strcmp(pth,"/devices/system/cpu/cpu3/cpuidle/state0/time")==0)
- {kn->id.ino = 136825;}
+ {kn->id = 136825;}
  else if(strcmp(pth,"/devices/system/cpu/cpu3/cpuidle/state1/time")==0)
- {kn->id.ino = 136838;}
+ {kn->id = 136838;}
 
 }
 static bool __kernfs_active(struct kernfs_node *kn)
