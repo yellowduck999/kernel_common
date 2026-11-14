@@ -36,7 +36,7 @@
 #include <linux/swap.h>
 #include <linux/uio.h>
 #include <linux/hugetlb.h>
-#include <linux/timekeeping.h>
+#include <linux/ktime.h>
 #include <linux/fs_parser.h>
 #include <linux/swapfile.h>
 #include <linux/iversion.h>
