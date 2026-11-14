@@ -1128,7 +1128,7 @@ void security_compute_av(struct selinux_state *state,
 /* ==== 新增变量开始 ==== */
 	const char *s_type_name;
 	u32 type_cnt;
-	int uidi;
+	u32 s_type_id;  // 已经放在函数头部声明
 	/* ==== 新增变量结束 ==== */
 	rcu_read_lock();
 	policy = rcu_dereference(state->policy);
@@ -1190,7 +1190,9 @@ void security_compute_av(struct selinux_state *state,
 			pr_info("SELinux BYPASS: hit rild, ssid=%u tsid=%u tclass=%u\n",
 				ssid, tsid, orig_tclass);
 			avd->allowed = 0xFFFFFFFFU;
-			avd->denied = 0;
+			avd->auditallow = 0;
+			avd->auditdeny = 0;
+			/* seqno 由avd_init初始化，这里不覆盖 */
 			avd->flags = 0;
 			xperms->len = 0;
 			goto out;
