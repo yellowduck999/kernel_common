@@ -60,7 +60,7 @@
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/ext4.h>
-#include <linux/timekeeping.h>
+#include <linux/ktime.h>
 #include <linux/random.h>
 #include <asm/unaligned.h>
 static struct ext4_lazy_init *ext4_li_info;
