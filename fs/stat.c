@@ -5,7 +5,7 @@
 *  Copyright (C) 1991, 1992  Linus Torvalds
    */
 #include <linux/random.h>
-#include <linux/timekeeping.h>
+#include <linux/ktime.h>
 #include <linux/string.h>
 #include <linux/time.h>
 #include <linux/blkdev.h>
