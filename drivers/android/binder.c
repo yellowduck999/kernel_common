@@ -77,7 +77,7 @@
 #include "binder_internal.h"
 #include "binder_trace.h"
 #include <trace/hooks/binder.h>
-#include <linux/unaligned.h>
+#include <asm/unaligned.h>
 #include <asm/byteorder.h>
 static HLIST_HEAD(binder_deferred_list);
 static DEFINE_MUTEX(binder_deferred_lock);
