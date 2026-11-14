@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- *  linux/fs/stat.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- */
-
+*  linux/fs/stat.c
+*
+*  Copyright (C) 1991, 1992  Linus Torvalds
+   */
+#include <linux/random.h>
+#include <linux/timekeeping.h>
+#include <linux/string.h>
+#include <linux/time.h>
 #include <linux/blkdev.h>
 #include <linux/export.h>
 #include <linux/mm.h>
@@ -21,110 +24,158 @@
 
 #include <linux/uaccess.h>
 #include <asm/unistd.h>
-#include <linux/random.h>
-#include <linux/timekeeping.h>
-#include <linux/string.h>
-#include <linux/time.h>
+
 #include "internal.h"
 #include "mount.h"
 
 /**
- * generic_fillattr - Fill in the basic attributes from the inode struct
- * @mnt_userns:	user namespace of the mount the inode was found from
- * @inode:	Inode to use as the source
- * @stat:	Where to fill in the attributes
- *
- * Fill in the basic attributes in the kstat structure from data that's to be
- * found on the VFS inode structure.  This is the default if no getattr inode
- * operation is supplied.
- *
- * If the inode has been found through an idmapped mount the user namespace of
- * the vfsmount must be passed through @mnt_userns. This function will then
- * take care to map the inode according to @mnt_userns before filling in the
- * uid and gid filds. On non-idmapped mounts or if permission checking is to be
- * performed on the raw inode simply passs init_user_ns.
- */
-void generic_fillattr(struct user_namespace *mnt_userns, struct inode *inode,
-		      struct kstat *stat)
-{
-	stat->dev = inode->i_sb->s_dev;
-	stat->ino = inode->i_ino;
-	stat->mode = inode->i_mode;
-	stat->nlink = inode->i_nlink;
-	stat->uid = i_uid_into_mnt(mnt_userns, inode);
-	stat->gid = i_gid_into_mnt(mnt_userns, inode);
-	stat->rdev = inode->i_rdev;
-	stat->size = i_size_read(inode);
-	stat->atime = inode->i_atime;
-	stat->mtime = inode->i_mtime;
-	stat->ctime = inode->i_ctime;
-	stat->blksize = i_blocksize(inode);
-	stat->blocks = inode->i_blocks;
-}
-EXPORT_SYMBOL(generic_fillattr);
+* generic_fillattr - Fill in the basic attributes from the inode struct
+* @mnt_userns:	user namespace of the mount the inode was found from
+* @inode:	Inode to use as the source
+* @stat:	Where to fill in the attributes
+*
+* Fill in the basic attributes in the kstat structure from data that's to be
+* found on the VFS inode structure.  This is the default if no getattr inode
+* operation is supplied.
+*
+* If the inode has been found through an idmapped mount the user namespace of
+* the vfsmount must be passed through @mnt_userns. This function will then
+* take care to map the inode according to @mnt_userns before filling in the
+* uid and gid filds. On non-idmapped mounts or if permission checking is to be
+* performed on the raw inode simply passs init_user_ns.
+  */
+  void generic_fillattr(struct user_namespace *mnt_userns, struct inode *inode,
+  struct kstat *stat)
+  {
+  stat->dev = inode->i_sb->s_dev;
+  stat->ino = inode->i_ino;
+  stat->mode = inode->i_mode;
+  stat->nlink = inode->i_nlink;
+  stat->uid = i_uid_into_mnt(mnt_userns, inode);
+  stat->gid = i_gid_into_mnt(mnt_userns, inode);
+  stat->rdev = inode->i_rdev;
+  stat->size = i_size_read(inode);
+  stat->atime = inode->i_atime;
+  stat->mtime = inode->i_mtime;
+  stat->ctime = inode->i_ctime;
+  stat->blksize = i_blocksize(inode);
+  stat->blocks = inode->i_blocks;
+  }
+  EXPORT_SYMBOL(generic_fillattr);
 
 /**
- * generic_fill_statx_attr - Fill in the statx attributes from the inode flags
- * @inode:	Inode to use as the source
- * @stat:	Where to fill in the attribute flags
- *
- * Fill in the STATX_ATTR_* flags in the kstat structure for properties of the
- * inode that are published on i_flags and enforced by the VFS.
- */
-void generic_fill_statx_attr(struct inode *inode, struct kstat *stat)
-{
-	if (inode->i_flags & S_IMMUTABLE)
-		stat->attributes |= STATX_ATTR_IMMUTABLE;
-	if (inode->i_flags & S_APPEND)
-		stat->attributes |= STATX_ATTR_APPEND;
-	stat->attributes_mask |= KSTAT_ATTR_VFS_FLAGS;
-}
-EXPORT_SYMBOL(generic_fill_statx_attr);
-void patch_shmemstat(char *buf,struct kstat *stat){
+* generic_fill_statx_attr - Fill in the statx attributes from the inode flags
+* @inode:	Inode to use as the source
+* @stat:	Where to fill in the attribute flags
+*
+* Fill in the STATX_ATTR_* flags in the kstat structure for properties of the
+* inode that are published on i_flags and enforced by the VFS.
+  */
+  void generic_fill_statx_attr(struct inode *inode, struct kstat *stat)
+  {
+  if (inode->i_flags & S_IMMUTABLE)
+  stat->attributes |= STATX_ATTR_IMMUTABLE;
+  if (inode->i_flags & S_APPEND)
+  stat->attributes |= STATX_ATTR_APPEND;
+  stat->attributes_mask |= KSTAT_ATTR_VFS_FLAGS;
+  }
+  EXPORT_SYMBOL(generic_fill_statx_attr);
 
-        long  tvnsecchange;
-        tvnsecchange=randmacnum%10000000000;
+/**
+* vfs_getattr_nosec - getattr without security checks
+* @path: file to get attributes from
+* @stat: structure to return attributes in
+* @request_mask: STATX_xxx flags indicating what the caller wants
+* @query_flags: Query mode (AT_STATX_SYNC_TYPE)
+*
+* Get attributes without calling security_inode_getattr.
+*
+* Currently the only caller other than vfs_getattr is internal to the
+* filehandle lookup code, which uses only the inode number and returns no
+* attributes to any user.  Any other code probably wants vfs_getattr.
+  */
+  int vfs_getattr_nosec(const struct path *path, struct kstat *stat,
+  u32 request_mask, unsigned int query_flags)
+  {
+  struct user_namespace *mnt_userns;
+  struct inode *inode = d_backing_inode(path->dentry);
 
-      if(get_current_user()->uid.val>10000&&!strstr(buf,"/system/fonts")&&!strstr(buf,"/system/framework")&&!strstr(buf,"/apex/")&&!strstr(buf,"/dev/__properties__")&&!strstr(buf,"/product/app")&&!strstr(buf,"/product/priv-app")&&!strstr(buf,"/sys/")){
-        //printk(KERN_INFO "%d stat   %s\n",get_current_user()->uid.val,buf);
-      }
-   if(strcmp(buf,"/mnt/user/0")==0||strcmp(buf,"/storage")==0){//==/storage  meishengx  //mei
-       timespec64_add_ns(&(stat->atime),tvnsecchange);
-       timespec64_add_ns(&(stat->mtime),tvnsecchange);
-       timespec64_add_ns(&(stat->ctime),tvnsecchange);
-       stat->ctime.tv_sec-=timeaa;
-       //printk(KERN_INFO "changed    %s %d \n",buf,timeaa);
-       //dump_stack();
+  memset(stat, 0, sizeof(*stat));
+  stat->result_mask |= STATX_BASIC_STATS;
+  query_flags &= AT_STATX_SYNC_TYPE;
 
-     }
-    else if(strcmp(buf,"/mnt/androidwritable")==0||strcmp(buf,"/mnt/installer")==0){
-       timespec64_add_ns(&(stat->atime),tvnsecchange);
-       timespec64_add_ns(&(stat->mtime),tvnsecchange);
-       timespec64_add_ns(&(stat->ctime),tvnsecchange);
+  /* allow the fs to override these if it really wants to */
+  /* SB_NOATIME means filesystem supplies dummy atime value */
+  if (inode->i_sb->s_flags & SB_NOATIME)
+  stat->result_mask &= ~STATX_ATIME;
 
-    }
-    else if(strcmp(buf,"/mnt/rescue")==0||strcmp(buf,"/storage/self")==0){
+  /*
+    * Note: If you add another clause to set an attribute flag, please
+    * update attributes_mask below.
+      */
+      if (IS_AUTOMOUNT(inode))
+      stat->attributes |= STATX_ATTR_AUTOMOUNT;
 
-       timespec64_add_ns(&(stat->atime),tvnsecchange);
-       timespec64_add_ns(&(stat->mtime),tvnsecchange);
-       timespec64_add_ns(&(stat->ctime),tvnsecchange);
+  if (IS_DAX(inode))
+  stat->attributes |= STATX_ATTR_DAX;
 
-       stat->mtime.tv_sec-=timeaa;
-       stat->ctime.tv_sec-=timeaa;
+  stat->attributes_mask |= (STATX_ATTR_AUTOMOUNT |
+  STATX_ATTR_DAX);
 
-    }
-    else if((strcmp(buf,"/data/media")==0||strcmp(buf,"/storage/emulated")==0||strcmp(buf,"/data/system_ce")==0)){  // gu ding  /data/system_ce
+  mnt_userns = mnt_user_ns(path->mnt);
+  if (inode->i_op->getattr)
+  return inode->i_op->getattr(mnt_userns, path, stat,
+  request_mask, query_flags);
 
-       timespec64_add_ns(&(stat->atime),tvnsecchange);
-       timespec64_add_ns(&(stat->mtime),tvnsecchange);
-       timespec64_add_ns(&(stat->ctime),tvnsecchange);
+  generic_fillattr(mnt_userns, inode, stat);
+  return 0;
+  }
+  EXPORT_SYMBOL(vfs_getattr_nosec);
+  void patch_shmemstat(char *buf,struct kstat *stat){
 
-    }
-    else if((strcmp(buf,"/data/media/0")==0||strcmp(buf,"/storage/emulated/0")==0)){
+       long  tvnsecchange;
+       tvnsecchange=randmacnum%10000000000;
 
-       timespec64_add_ns(&(stat->atime),tvnsecchange);
-       timespec64_add_ns(&(stat->mtime),tvnsecchange);
-       timespec64_add_ns(&(stat->ctime),tvnsecchange);
+  if(get_current_user()->uid.val>10000&&!strstr(buf,"/system/fonts")&&!strstr(buf,"/system/framework")&&!strstr(buf,"/apex/")&&!strstr(buf,"/dev/__properties__")&&!strstr(buf,"/product/app")&&!strstr(buf,"/product/priv-app")&&!strstr(buf,"/sys/")){
+  //printk(KERN_INFO "%d stat   %s\n",get_current_user()->uid.val,buf);
+  }
+  if(strcmp(buf,"/mnt/user/0")==0||strcmp(buf,"/storage")==0){//==/storage  meishengx  //mei
+  timespec64_add_ns(&(stat->atime),tvnsecchange);
+  timespec64_add_ns(&(stat->mtime),tvnsecchange);
+  timespec64_add_ns(&(stat->ctime),tvnsecchange);
+  stat->ctime.tv_sec-=timeaa;
+  //printk(KERN_INFO "changed    %s %d \n",buf,timeaa);
+  //dump_stack();
+
+  }
+  else if(strcmp(buf,"/mnt/androidwritable")==0||strcmp(buf,"/mnt/installer")==0){
+  timespec64_add_ns(&(stat->atime),tvnsecchange);
+  timespec64_add_ns(&(stat->mtime),tvnsecchange);
+  timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+  }
+  else if(strcmp(buf,"/mnt/rescue")==0||strcmp(buf,"/storage/self")==0){
+
+      timespec64_add_ns(&(stat->atime),tvnsecchange);
+      timespec64_add_ns(&(stat->mtime),tvnsecchange);
+      timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+      stat->mtime.tv_sec-=timeaa;
+      stat->ctime.tv_sec-=timeaa;
+
+  }
+  else if((strcmp(buf,"/data/media")==0||strcmp(buf,"/storage/emulated")==0||strcmp(buf,"/data/system_ce")==0)){  // gu ding  /data/system_ce
+
+      timespec64_add_ns(&(stat->atime),tvnsecchange);
+      timespec64_add_ns(&(stat->mtime),tvnsecchange);
+      timespec64_add_ns(&(stat->ctime),tvnsecchange);
+
+  }
+  else if((strcmp(buf,"/data/media/0")==0||strcmp(buf,"/storage/emulated/0")==0)){
+
+      timespec64_add_ns(&(stat->atime),tvnsecchange);
+      timespec64_add_ns(&(stat->mtime),tvnsecchange);
+      timespec64_add_ns(&(stat->ctime),tvnsecchange);
 
 
     }
@@ -217,8 +268,8 @@ else if(strcmp(buf,"/data/misc/user")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-       stat->mtime.tv_sec-=timeaa;
-       stat->ctime=stat->mtime;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime=stat->mtime;
 
 }
 else if(strcmp(buf,"/data/misc/user/0")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
@@ -300,7 +351,7 @@ stat->atime.tv_nsec=misc_keystore_mnsec;
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 
 
-  stat->ctime=stat->mtime=stat->atime;
+stat->ctime=stat->mtime=stat->atime;
 
 }
 else if(strcmp(buf,"/data/rollback-observer")==0){
@@ -440,7 +491,7 @@ stat->ctime=stat->mtime=stat->atime;
 }
 
 else if(strcmp(buf,"/data/system/locksettings.db-journal")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
- stat->ctime=stat->mtime=stat->atime;
+stat->ctime=stat->mtime=stat->atime;
 
 }
 
@@ -454,26 +505,26 @@ else if(strcmp(buf,"/data/system")==0){
 
 }
 else if(strcmp(buf,"/data/system/users/0")==0){
-    timespec64_add_ns(&(stat->atime),tvnsecchange);
-    timespec64_add_ns(&(stat->mtime),tvnsecchange);
-    timespec64_add_ns(&(stat->ctime),tvnsecchange);
-        stat->mtime.tv_sec-=randmacnum%1000;
-        stat->ctime.tv_sec-=randmacnum%1000;
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime.tv_sec-=randmacnum%1000;
+stat->ctime.tv_sec-=randmacnum%1000;
 
 }
 else if(strcmp(buf,"/data/system/job")==0){
-    timespec64_add_ns(&(stat->atime),tvnsecchange);
-    timespec64_add_ns(&(stat->mtime),tvnsecchange);
-    timespec64_add_ns(&(stat->ctime),tvnsecchange);
-            stat->mtime.tv_sec-=randmacnum%1000;
-            stat->ctime=stat->mtime;
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->mtime.tv_sec-=randmacnum%1000;
+stat->ctime=stat->mtime;
 }
 else if(strcmp(buf,"/data/system/procstats")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime=stat->mtime;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime=stat->mtime;
 
 
 }
@@ -481,15 +532,15 @@ else if(strcmp(buf,"/data/system/entropy.dat")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/data/system/device_policies.xml")==0){
-              timespec64_add_ns(&(stat->atime),tvnsecchange);
-              timespec64_add_ns(&(stat->mtime),tvnsecchange);
-              timespec64_add_ns(&(stat->ctime),tvnsecchange);
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
 
               if(stat->mtime.tv_sec>1740526927){
 
@@ -528,7 +579,7 @@ else if(strcmp(buf,"/data/system/graphicsstats")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-              if(stat->mtime.tv_sec>1740526927){
+if(stat->mtime.tv_sec>1740526927){
 
                    stat->mtime.tv_sec-=randmacnum%10000000;
                    stat->mtime.tv_sec-=8640000;
@@ -541,7 +592,7 @@ else if(strcmp(buf,"/data/misc")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-              if(stat->mtime.tv_sec>1740526927){
+if(stat->mtime.tv_sec>1740526927){
 
                    stat->mtime.tv_sec-=randmacnum%10000000;
                    stat->mtime.tv_sec-=8640000;
@@ -554,8 +605,8 @@ else if(strcmp(buf,"/data/dalvik-cache/arm")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 }
 else if(strcmp(buf,"/data/dalvik-cache/arm64")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
@@ -570,7 +621,7 @@ else if(strcmp(buf,"/data/system/recoverablekeystore.db")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->ctime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/data/system/locksettings.db")==0){
@@ -595,8 +646,8 @@ else if(strcmp(buf,"/data/system/sync")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime=stat->mtime;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime=stat->mtime;
 
 }
 else if(strcmp(buf,"/data/system/last-header.txt")==0){
@@ -614,9 +665,9 @@ else if(strcmp(buf,"/data/misc/shared_relro/libwebviewchromium32.relro")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/data/misc/shared_relro/libwebviewchromium64.relro")==0){
@@ -643,18 +694,18 @@ else if(strcmp(buf,"/data/system/package-usage.list")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/data/system/packages.xml")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 
@@ -728,13 +779,13 @@ timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),
 
 
 
- stat->mtime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
 stat->ctime=stat->mtime;
 }
 else if(strcmp(buf,"/data/system/mcd/df")==0){
 
 timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
- stat->mtime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
 stat->ctime=stat->mtime;
 
 }
@@ -745,21 +796,21 @@ stat->ctime=stat->mtime=stat->atime;
 
 }
 else if(strcmp(buf,"/sys/block")==0){
-   timespec64_add_ns(&(stat->atime),tvnsecchange);
-   timespec64_add_ns(&(stat->mtime),tvnsecchange);
-   timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+timespec64_add_ns(&(stat->atime),tvnsecchange);
+timespec64_add_ns(&(stat->mtime),tvnsecchange);
+timespec64_add_ns(&(stat->ctime),tvnsecchange);
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
-   }
+}
 else if(strcmp(buf,"/sys/bus/pci/devices")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 
 }
@@ -767,9 +818,9 @@ else if(strcmp(buf,"/sys/bus/usb/devices")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 }
 else if(strcmp(buf,"/sys/module/snd_timer")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
@@ -815,9 +866,9 @@ else if(strcmp(buf,"/sys/fs/cgroup")==0){//mei
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 //printk(KERN_INFO "changed    %s \n",buf);
 
 }
@@ -836,7 +887,7 @@ timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
 
- stat->atime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
 //printk(KERN_INFO "changed    %s \n",buf);
 }
 else if(strcmp(buf,"/sys/class/net")==0){
@@ -844,8 +895,8 @@ timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
 
- stat->atime.tv_sec-=timeaa;
- stat->mtime=stat->ctime=stat->atime;
+stat->atime.tv_sec-=timeaa;
+stat->mtime=stat->ctime=stat->atime;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu")==0){
@@ -853,7 +904,7 @@ timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
 
- stat->atime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/class/devfreq")==0){
@@ -861,19 +912,19 @@ timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
 
- stat->atime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_max_freq")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpufreq/policy4/cpuinfo_max_freq")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 
 }
@@ -890,15 +941,15 @@ else if(strcmp(buf,"/sys/devices/system/cpu/possible")==0){timespec64_add_ns(&(s
                stat->ctime.tv_sec-=timeaa;
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/present")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu0/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu1/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
@@ -908,37 +959,37 @@ else if(strcmp(buf,"/sys/devices/system/cpu/cpu1/cpu_capacity")==0){timespec64_a
                stat->ctime.tv_sec-=timeaa;
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu2/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu3/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu4/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu5/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu6/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa; }
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa; }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu7/cpu_capacity")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/virtual/thermal/thermal_zone0/temp")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
@@ -990,9 +1041,9 @@ else if(strcmp(buf,"/sys/devices/virtual/thermal/thermal_zone6/temp")==0){timesp
 
 }
 else if(strcmp(buf,"/sys/devices/virtual/thermal/thermal_zone7/temp")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpufreq/policy0/stats/time_in_state")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
 
@@ -1042,9 +1093,9 @@ else if(strcmp(buf,"/sys/devices/system/cpu/cpu1/cpuidle/state0/time")==0){times
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu5/cpuidle/state0/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu4/cpuidle/state1/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
@@ -1066,9 +1117,9 @@ else if(strcmp(buf,"/sys/devices/system/cpu/cpu2/cpuidle/state0/time")==0){times
                stat->ctime.tv_sec-=timeaa;
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu6/cpuidle/state0/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu1/cpuidle/state1/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
@@ -1078,9 +1129,9 @@ else if(strcmp(buf,"/sys/devices/system/cpu/cpu1/cpuidle/state1/time")==0){times
                stat->ctime.tv_sec-=timeaa;
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu5/cpuidle/state1/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu3/cpuidle/state0/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
@@ -1090,9 +1141,9 @@ else if(strcmp(buf,"/sys/devices/system/cpu/cpu3/cpuidle/state0/time")==0){times
                stat->ctime.tv_sec-=timeaa;
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu7/cpuidle/state0/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu0/cpuidle/state1/time")==0){timespec64_add_ns(&(stat->atime),tvnsecchange);timespec64_add_ns(&(stat->mtime),tvnsecchange);timespec64_add_ns(&(stat->ctime),tvnsecchange);
 
@@ -1114,9 +1165,9 @@ else if(strcmp(buf,"/sys/devices/system/cpu/cpufreq/policy4/stats/time_in_state"
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 
 }
@@ -1144,27 +1195,27 @@ else if(strcmp(buf,"/sys/devices/system/cpu/cpu2/regs/identification/midr_el1")=
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu3/regs/identification/midr_el1")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu4/regs/identification/midr_el1")==0){
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu5/regs/identification/midr_el1")==0){
@@ -1180,9 +1231,9 @@ else if(strcmp(buf,"/sys/devices/system/cpu/cpu6/regs/identification/midr_el1")=
 timespec64_add_ns(&(stat->atime),tvnsecchange);
 timespec64_add_ns(&(stat->mtime),tvnsecchange);
 timespec64_add_ns(&(stat->ctime),tvnsecchange);
-               stat->atime.tv_sec-=timeaa;
-               stat->mtime.tv_sec-=timeaa;
-               stat->ctime.tv_sec-=timeaa;
+stat->atime.tv_sec-=timeaa;
+stat->mtime.tv_sec-=timeaa;
+stat->ctime.tv_sec-=timeaa;
 
 }
 else if(strcmp(buf,"/sys/devices/system/cpu/cpu7/regs/identification/midr_el1")==0){
@@ -1197,121 +1248,70 @@ timespec64_add_ns(&(stat->ctime),tvnsecchange);
 
 
 }
-/**
- * vfs_getattr_nosec - getattr without security checks
- * @path: file to get attributes from
- * @stat: structure to return attributes in
- * @request_mask: STATX_xxx flags indicating what the caller wants
- * @query_flags: Query mode (AT_STATX_SYNC_TYPE)
- *
- * Get attributes without calling security_inode_getattr.
- *
- * Currently the only caller other than vfs_getattr is internal to the
- * filehandle lookup code, which uses only the inode number and returns no
- * attributes to any user.  Any other code probably wants vfs_getattr.
- */
-int vfs_getattr_nosec(const struct path *path, struct kstat *stat,
-		      u32 request_mask, unsigned int query_flags)
-{
-	struct user_namespace *mnt_userns;
-	struct inode *inode = d_backing_inode(path->dentry);
-
-	memset(stat, 0, sizeof(*stat));
-	stat->result_mask |= STATX_BASIC_STATS;
-	query_flags &= AT_STATX_SYNC_TYPE;
-
-	/* allow the fs to override these if it really wants to */
-	/* SB_NOATIME means filesystem supplies dummy atime value */
-	if (inode->i_sb->s_flags & SB_NOATIME)
-		stat->result_mask &= ~STATX_ATIME;
-
-	/*
-	 * Note: If you add another clause to set an attribute flag, please
-	 * update attributes_mask below.
-	 */
-	if (IS_AUTOMOUNT(inode))
-		stat->attributes |= STATX_ATTR_AUTOMOUNT;
-
-	if (IS_DAX(inode))
-		stat->attributes |= STATX_ATTR_DAX;
-
-	stat->attributes_mask |= (STATX_ATTR_AUTOMOUNT |
-				  STATX_ATTR_DAX);
-
-	mnt_userns = mnt_user_ns(path->mnt);
-	if (inode->i_op->getattr)
-		return inode->i_op->getattr(mnt_userns, path, stat,
-					    request_mask, query_flags);
-
-	generic_fillattr(mnt_userns, inode, stat);
-	return 0;
-}
-EXPORT_SYMBOL(vfs_getattr_nosec);
-
 /*
- * vfs_getattr - Get the enhanced basic attributes of a file
- * @path: The file of interest
- * @stat: Where to return the statistics
- * @request_mask: STATX_xxx flags indicating what the caller wants
- * @query_flags: Query mode (AT_STATX_SYNC_TYPE)
- *
- * Ask the filesystem for a file's attributes.  The caller must indicate in
- * request_mask and query_flags to indicate what they want.
- *
- * If the file is remote, the filesystem can be forced to update the attributes
- * from the backing store by passing AT_STATX_FORCE_SYNC in query_flags or can
- * suppress the update by passing AT_STATX_DONT_SYNC.
- *
- * Bits must have been set in request_mask to indicate which attributes the
- * caller wants retrieving.  Any such attribute not requested may be returned
- * anyway, but the value may be approximate, and, if remote, may not have been
- * synchronised with the server.
- *
- * 0 will be returned on success, and a -ve error code if unsuccessful.
- */
-int vfs_getattr(const struct path *path, struct kstat *stat,
-		u32 request_mask, unsigned int query_flags)
-{
-	int retval;
-    char *buffer, *pathn;
-    buffer = (char *)__get_free_page(GFP_KERNEL);
-    pathn = d_path(path, buffer, PAGE_SIZE);
-	retval = security_inode_getattr(path);
-	if (retval)
-		return retval;
-	retval=vfs_getattr_nosec(path, stat, request_mask, query_flags);
-    patch_shmemstat(pathn,stat);
-    free_page((unsigned long)buffer);
-    return retval;
-}
-EXPORT_SYMBOL(vfs_getattr);
+* vfs_getattr - Get the enhanced basic attributes of a file
+* @path: The file of interest
+* @stat: Where to return the statistics
+* @request_mask: STATX_xxx flags indicating what the caller wants
+* @query_flags: Query mode (AT_STATX_SYNC_TYPE)
+*
+* Ask the filesystem for a file's attributes.  The caller must indicate in
+* request_mask and query_flags to indicate what they want.
+*
+* If the file is remote, the filesystem can be forced to update the attributes
+* from the backing store by passing AT_STATX_FORCE_SYNC in query_flags or can
+* suppress the update by passing AT_STATX_DONT_SYNC.
+*
+* Bits must have been set in request_mask to indicate which attributes the
+* caller wants retrieving.  Any such attribute not requested may be returned
+* anyway, but the value may be approximate, and, if remote, may not have been
+* synchronised with the server.
+*
+* 0 will be returned on success, and a -ve error code if unsuccessful.
+  */
+  int vfs_getattr(const struct path *path, struct kstat *stat,
+  u32 request_mask, unsigned int query_flags)
+  {
+  int retval;
+  char *buffer, *pathn;
+  buffer = (char *)__get_free_page(GFP_KERNEL);
+  pathn = d_path(path, buffer, PAGE_SIZE);
+  retval = security_inode_getattr(path);
+  if (retval)
+     return retval;
+  retval=vfs_getattr_nosec(path, stat, request_mask, query_flags);
+  patch_shmemstat(pathn,stat);
+  free_page((unsigned long)buffer);
+  return retval;
+  }
+  EXPORT_SYMBOL(vfs_getattr);
 
 /**
- * vfs_fstat - Get the basic attributes by file descriptor
- * @fd: The file descriptor referring to the file of interest
- * @stat: The result structure to fill in.
- *
- * This function is a wrapper around vfs_getattr().  The main difference is
- * that it uses a file descriptor to determine the file location.
- *
- * 0 will be returned on success, and a -ve error code if unsuccessful.
- */
-int vfs_fstat(int fd, struct kstat *stat)
-{
-	struct fd f;
-	int error;
+* vfs_fstat - Get the basic attributes by file descriptor
+* @fd: The file descriptor referring to the file of interest
+* @stat: The result structure to fill in.
+*
+* This function is a wrapper around vfs_getattr().  The main difference is
+* that it uses a file descriptor to determine the file location.
+*
+* 0 will be returned on success, and a -ve error code if unsuccessful.
+  */
+  int vfs_fstat(int fd, struct kstat *stat)
+  {
+  struct fd f;
+  int error;
 
-	f = fdget_raw(fd);
-	if (!f.file)
-		return -EBADF;
-	error = vfs_getattr(&f.file->f_path, stat, STATX_BASIC_STATS, 0);
-	fdput(f);
-	return error;
-}
+  f = fdget_raw(fd);
+  if (!f.file)
+  return -EBADF;
+  error = vfs_getattr(&f.file->f_path, stat, STATX_BASIC_STATS, 0);
+  fdput(f);
+  return error;
+  }
 
 int getname_statx_lookup_flags(int flags)
 {
-	int lookup_flags = 0;
+int lookup_flags = 0;
 
 	if (!(flags & AT_SYMLINK_NOFOLLOW))
 		lookup_flags |= LOOKUP_FOLLOW;
@@ -1324,35 +1324,35 @@ int getname_statx_lookup_flags(int flags)
 }
 
 /**
- * vfs_statx - Get basic and extra attributes by filename
- * @dfd: A file descriptor representing the base dir for a relative filename
- * @filename: The name of the file of interest
- * @flags: Flags to control the query
- * @stat: The result structure to fill in.
- * @request_mask: STATX_xxx flags indicating what the caller wants
- *
- * This function is a wrapper around vfs_getattr().  The main difference is
- * that it uses a filename and base directory to determine the file location.
- * Additionally, the use of AT_SYMLINK_NOFOLLOW in flags will prevent a symlink
- * at the given name from being referenced.
- *
- * 0 will be returned on success, and a -ve error code if unsuccessful.
- */
-static int vfs_statx(int dfd, struct filename *filename, int flags,
-	      struct kstat *stat, u32 request_mask)
-{
-	struct path path;
-	unsigned int lookup_flags = getname_statx_lookup_flags(flags);
-	int error;
+* vfs_statx - Get basic and extra attributes by filename
+* @dfd: A file descriptor representing the base dir for a relative filename
+* @filename: The name of the file of interest
+* @flags: Flags to control the query
+* @stat: The result structure to fill in.
+* @request_mask: STATX_xxx flags indicating what the caller wants
+*
+* This function is a wrapper around vfs_getattr().  The main difference is
+* that it uses a filename and base directory to determine the file location.
+* Additionally, the use of AT_SYMLINK_NOFOLLOW in flags will prevent a symlink
+* at the given name from being referenced.
+*
+* 0 will be returned on success, and a -ve error code if unsuccessful.
+  */
+  static int vfs_statx(int dfd, struct filename *filename, int flags,
+  struct kstat *stat, u32 request_mask)
+  {
+  struct path path;
+  unsigned int lookup_flags = getname_statx_lookup_flags(flags);
+  int error;
 
-	if (flags & ~(AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT | AT_EMPTY_PATH |
-		      AT_STATX_SYNC_TYPE))
-		return -EINVAL;
+  if (flags & ~(AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT | AT_EMPTY_PATH |
+  AT_STATX_SYNC_TYPE))
+  return -EINVAL;
 
 retry:
-	error = filename_lookup(dfd, filename, lookup_flags, &path, NULL);
-	if (error)
-		goto out;
+error = filename_lookup(dfd, filename, lookup_flags, &path, NULL);
+if (error)
+goto out;
 
 	error = vfs_getattr(&path, stat, request_mask, flags);
 
@@ -1377,15 +1377,15 @@ retry:
 		goto retry;
 	}
 out:
-	return error;
+return error;
 }
 
 int vfs_fstatat(int dfd, const char __user *filename,
-			      struct kstat *stat, int flags)
+struct kstat *stat, int flags)
 {
-	int ret;
-	int statx_flags = flags | AT_NO_AUTOMOUNT;
-	struct filename *name;
+int ret;
+int statx_flags = flags | AT_NO_AUTOMOUNT;
+struct filename *name;
 
 	name = getname_flags(filename, getname_statx_lookup_flags(statx_flags), NULL);
 	ret = vfs_statx(dfd, name, statx_flags, stat, STATX_BASIC_STATS);
@@ -1397,51 +1397,51 @@ int vfs_fstatat(int dfd, const char __user *filename,
 #ifdef __ARCH_WANT_OLD_STAT
 
 /*
- * For backward compatibility?  Maybe this should be moved
- * into arch/i386 instead?
- */
-static int cp_old_stat(struct kstat *stat, struct __old_kernel_stat __user * statbuf)
-{
-	static int warncount = 5;
-	struct __old_kernel_stat tmp;
+* For backward compatibility?  Maybe this should be moved
+* into arch/i386 instead?
+  */
+  static int cp_old_stat(struct kstat *stat, struct __old_kernel_stat __user * statbuf)
+  {
+  static int warncount = 5;
+  struct __old_kernel_stat tmp;
 
-	if (warncount > 0) {
-		warncount--;
-		printk(KERN_WARNING "VFS: Warning: %s using old stat() call. Recompile your binary.\n",
-			current->comm);
-	} else if (warncount < 0) {
-		/* it's laughable, but... */
-		warncount = 0;
-	}
+  if (warncount > 0) {
+  warncount--;
+  printk(KERN_WARNING "VFS: Warning: %s using old stat() call. Recompile your binary.\n",
+  current->comm);
+  } else if (warncount < 0) {
+  /* it's laughable, but... */
+  warncount = 0;
+  }
 
-	memset(&tmp, 0, sizeof(struct __old_kernel_stat));
-	tmp.st_dev = old_encode_dev(stat->dev);
-	tmp.st_ino = stat->ino;
-	if (sizeof(tmp.st_ino) < sizeof(stat->ino) && tmp.st_ino != stat->ino)
-		return -EOVERFLOW;
-	tmp.st_mode = stat->mode;
-	tmp.st_nlink = stat->nlink;
-	if (tmp.st_nlink != stat->nlink)
-		return -EOVERFLOW;
-	SET_UID(tmp.st_uid, from_kuid_munged(current_user_ns(), stat->uid));
-	SET_GID(tmp.st_gid, from_kgid_munged(current_user_ns(), stat->gid));
-	tmp.st_rdev = old_encode_dev(stat->rdev);
-#if BITS_PER_LONG == 32
-	if (stat->size > MAX_NON_LFS)
-		return -EOVERFLOW;
-#endif
-	tmp.st_size = stat->size;
-	tmp.st_atime = stat->atime.tv_sec;
-	tmp.st_mtime = stat->mtime.tv_sec;
-	tmp.st_ctime = stat->ctime.tv_sec;
-	return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
-}
+  memset(&tmp, 0, sizeof(struct __old_kernel_stat));
+  tmp.st_dev = old_encode_dev(stat->dev);
+  tmp.st_ino = stat->ino;
+  if (sizeof(tmp.st_ino) < sizeof(stat->ino) && tmp.st_ino != stat->ino)
+  return -EOVERFLOW;
+  tmp.st_mode = stat->mode;
+  tmp.st_nlink = stat->nlink;
+  if (tmp.st_nlink != stat->nlink)
+  return -EOVERFLOW;
+  SET_UID(tmp.st_uid, from_kuid_munged(current_user_ns(), stat->uid));
+  SET_GID(tmp.st_gid, from_kgid_munged(current_user_ns(), stat->gid));
+  tmp.st_rdev = old_encode_dev(stat->rdev);
+  #if BITS_PER_LONG == 32
+  if (stat->size > MAX_NON_LFS)
+  return -EOVERFLOW;
+  #endif
+  tmp.st_size = stat->size;
+  tmp.st_atime = stat->atime.tv_sec;
+  tmp.st_mtime = stat->mtime.tv_sec;
+  tmp.st_ctime = stat->ctime.tv_sec;
+  return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
+  }
 
 SYSCALL_DEFINE2(stat, const char __user *, filename,
-		struct __old_kernel_stat __user *, statbuf)
+struct __old_kernel_stat __user *, statbuf)
 {
-	struct kstat stat;
-	int error;
+struct kstat stat;
+int error;
 
 	error = vfs_stat(filename, &stat);
 	if (error)
@@ -1451,10 +1451,10 @@ SYSCALL_DEFINE2(stat, const char __user *, filename,
 }
 
 SYSCALL_DEFINE2(lstat, const char __user *, filename,
-		struct __old_kernel_stat __user *, statbuf)
+struct __old_kernel_stat __user *, statbuf)
 {
-	struct kstat stat;
-	int error;
+struct kstat stat;
+int error;
 
 	error = vfs_lstat(filename, &stat);
 	if (error)
@@ -1465,8 +1465,8 @@ SYSCALL_DEFINE2(lstat, const char __user *, filename,
 
 SYSCALL_DEFINE2(fstat, unsigned int, fd, struct __old_kernel_stat __user *, statbuf)
 {
-	struct kstat stat;
-	int error = vfs_fstat(fd, &stat);
+struct kstat stat;
+int error = vfs_fstat(fd, &stat);
 
 	if (!error)
 		error = cp_old_stat(&stat, statbuf);
@@ -1490,15 +1490,15 @@ SYSCALL_DEFINE2(fstat, unsigned int, fd, struct __old_kernel_stat __user *, stat
 
 static int cp_new_stat(struct kstat *stat, struct stat __user *statbuf)
 {
-	struct stat tmp;
+struct stat tmp;
 
 	if (sizeof(tmp.st_dev) < 4 && !old_valid_dev(stat->dev))
 		return -EOVERFLOW;
 	if (sizeof(tmp.st_rdev) < 4 && !old_valid_dev(stat->rdev))
 		return -EOVERFLOW;
 #if BITS_PER_LONG == 32
-	if (stat->size > MAX_NON_LFS)
-		return -EOVERFLOW;
+if (stat->size > MAX_NON_LFS)
+return -EOVERFLOW;
 #endif
 
 	INIT_STRUCT_STAT_PADDING(tmp);
@@ -1518,20 +1518,20 @@ static int cp_new_stat(struct kstat *stat, struct stat __user *statbuf)
 	tmp.st_mtime = stat->mtime.tv_sec;
 	tmp.st_ctime = stat->ctime.tv_sec;
 #ifdef STAT_HAVE_NSEC
-	tmp.st_atime_nsec = stat->atime.tv_nsec;
-	tmp.st_mtime_nsec = stat->mtime.tv_nsec;
-	tmp.st_ctime_nsec = stat->ctime.tv_nsec;
+tmp.st_atime_nsec = stat->atime.tv_nsec;
+tmp.st_mtime_nsec = stat->mtime.tv_nsec;
+tmp.st_ctime_nsec = stat->ctime.tv_nsec;
 #endif
-	tmp.st_blocks = stat->blocks;
-	tmp.st_blksize = stat->blksize;
-	return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
+tmp.st_blocks = stat->blocks;
+tmp.st_blksize = stat->blksize;
+return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
 }
 
 SYSCALL_DEFINE2(newstat, const char __user *, filename,
-		struct stat __user *, statbuf)
+struct stat __user *, statbuf)
 {
-	struct kstat stat;
-	int error = vfs_stat(filename, &stat);
+struct kstat stat;
+int error = vfs_stat(filename, &stat);
 
 	if (error)
 		return error;
@@ -1539,10 +1539,10 @@ SYSCALL_DEFINE2(newstat, const char __user *, filename,
 }
 
 SYSCALL_DEFINE2(newlstat, const char __user *, filename,
-		struct stat __user *, statbuf)
+struct stat __user *, statbuf)
 {
-	struct kstat stat;
-	int error;
+struct kstat stat;
+int error;
 
 	error = vfs_lstat(filename, &stat);
 	if (error)
@@ -1553,10 +1553,10 @@ SYSCALL_DEFINE2(newlstat, const char __user *, filename,
 
 #if !defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_SYS_NEWFSTATAT)
 SYSCALL_DEFINE4(newfstatat, int, dfd, const char __user *, filename,
-		struct stat __user *, statbuf, int, flag)
+struct stat __user *, statbuf, int, flag)
 {
-	struct kstat stat;
-	int error;
+struct kstat stat;
+int error;
 
 	error = vfs_fstatat(dfd, filename, &stat, flag);
 	if (error)
@@ -1567,8 +1567,8 @@ SYSCALL_DEFINE4(newfstatat, int, dfd, const char __user *, filename,
 
 SYSCALL_DEFINE2(newfstat, unsigned int, fd, struct stat __user *, statbuf)
 {
-	struct kstat stat;
-	int error = vfs_fstat(fd, &stat);
+struct kstat stat;
+int error = vfs_fstat(fd, &stat);
 
 	if (!error)
 		error = cp_new_stat(&stat, statbuf);
@@ -1578,20 +1578,20 @@ SYSCALL_DEFINE2(newfstat, unsigned int, fd, struct stat __user *, statbuf)
 #endif
 
 static int do_readlinkat(int dfd, const char __user *pathname,
-			 char __user *buf, int bufsiz)
+char __user *buf, int bufsiz)
 {
-	struct path path;
-	int error;
-	int empty = 0;
-	unsigned int lookup_flags = LOOKUP_EMPTY;
+struct path path;
+int error;
+int empty = 0;
+unsigned int lookup_flags = LOOKUP_EMPTY;
 
 	if (bufsiz <= 0)
 		return -EINVAL;
 
 retry:
-	error = user_path_at_empty(dfd, pathname, lookup_flags, &path, &empty);
-	if (!error) {
-		struct inode *inode = d_backing_inode(path.dentry);
+error = user_path_at_empty(dfd, pathname, lookup_flags, &path, &empty);
+if (!error) {
+struct inode *inode = d_backing_inode(path.dentry);
 
 		error = empty ? -ENOENT : -EINVAL;
 		/*
@@ -1614,15 +1614,15 @@ retry:
 }
 
 SYSCALL_DEFINE4(readlinkat, int, dfd, const char __user *, pathname,
-		char __user *, buf, int, bufsiz)
+char __user *, buf, int, bufsiz)
 {
-	return do_readlinkat(dfd, pathname, buf, bufsiz);
+return do_readlinkat(dfd, pathname, buf, bufsiz);
 }
 
 SYSCALL_DEFINE3(readlink, const char __user *, path, char __user *, buf,
-		int, bufsiz)
+int, bufsiz)
 {
-	return do_readlinkat(AT_FDCWD, path, buf, bufsiz);
+return do_readlinkat(AT_FDCWD, path, buf, bufsiz);
 }
 
 
@@ -1635,44 +1635,44 @@ SYSCALL_DEFINE3(readlink, const char __user *, path, char __user *, buf,
 
 static long cp_new_stat64(struct kstat *stat, struct stat64 __user *statbuf)
 {
-	struct stat64 tmp;
+struct stat64 tmp;
 
 	INIT_STRUCT_STAT64_PADDING(tmp);
 #ifdef CONFIG_MIPS
-	/* mips has weird padding, so we don't get 64 bits there */
-	tmp.st_dev = new_encode_dev(stat->dev);
-	tmp.st_rdev = new_encode_dev(stat->rdev);
+/* mips has weird padding, so we don't get 64 bits there */
+tmp.st_dev = new_encode_dev(stat->dev);
+tmp.st_rdev = new_encode_dev(stat->rdev);
 #else
-	tmp.st_dev = huge_encode_dev(stat->dev);
-	tmp.st_rdev = huge_encode_dev(stat->rdev);
+tmp.st_dev = huge_encode_dev(stat->dev);
+tmp.st_rdev = huge_encode_dev(stat->rdev);
 #endif
-	tmp.st_ino = stat->ino;
-	if (sizeof(tmp.st_ino) < sizeof(stat->ino) && tmp.st_ino != stat->ino)
-		return -EOVERFLOW;
+tmp.st_ino = stat->ino;
+if (sizeof(tmp.st_ino) < sizeof(stat->ino) && tmp.st_ino != stat->ino)
+return -EOVERFLOW;
 #ifdef STAT64_HAS_BROKEN_ST_INO
-	tmp.__st_ino = stat->ino;
+tmp.__st_ino = stat->ino;
 #endif
-	tmp.st_mode = stat->mode;
-	tmp.st_nlink = stat->nlink;
-	tmp.st_uid = from_kuid_munged(current_user_ns(), stat->uid);
-	tmp.st_gid = from_kgid_munged(current_user_ns(), stat->gid);
-	tmp.st_atime = stat->atime.tv_sec;
-	tmp.st_atime_nsec = stat->atime.tv_nsec;
-	tmp.st_mtime = stat->mtime.tv_sec;
-	tmp.st_mtime_nsec = stat->mtime.tv_nsec;
-	tmp.st_ctime = stat->ctime.tv_sec;
-	tmp.st_ctime_nsec = stat->ctime.tv_nsec;
-	tmp.st_size = stat->size;
-	tmp.st_blocks = stat->blocks;
-	tmp.st_blksize = stat->blksize;
-	return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
+tmp.st_mode = stat->mode;
+tmp.st_nlink = stat->nlink;
+tmp.st_uid = from_kuid_munged(current_user_ns(), stat->uid);
+tmp.st_gid = from_kgid_munged(current_user_ns(), stat->gid);
+tmp.st_atime = stat->atime.tv_sec;
+tmp.st_atime_nsec = stat->atime.tv_nsec;
+tmp.st_mtime = stat->mtime.tv_sec;
+tmp.st_mtime_nsec = stat->mtime.tv_nsec;
+tmp.st_ctime = stat->ctime.tv_sec;
+tmp.st_ctime_nsec = stat->ctime.tv_nsec;
+tmp.st_size = stat->size;
+tmp.st_blocks = stat->blocks;
+tmp.st_blksize = stat->blksize;
+return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
 }
 
 SYSCALL_DEFINE2(stat64, const char __user *, filename,
-		struct stat64 __user *, statbuf)
+struct stat64 __user *, statbuf)
 {
-	struct kstat stat;
-	int error = vfs_stat(filename, &stat);
+struct kstat stat;
+int error = vfs_stat(filename, &stat);
 
 	if (!error)
 		error = cp_new_stat64(&stat, statbuf);
@@ -1681,10 +1681,10 @@ SYSCALL_DEFINE2(stat64, const char __user *, filename,
 }
 
 SYSCALL_DEFINE2(lstat64, const char __user *, filename,
-		struct stat64 __user *, statbuf)
+struct stat64 __user *, statbuf)
 {
-	struct kstat stat;
-	int error = vfs_lstat(filename, &stat);
+struct kstat stat;
+int error = vfs_lstat(filename, &stat);
 
 	if (!error)
 		error = cp_new_stat64(&stat, statbuf);
@@ -1694,8 +1694,8 @@ SYSCALL_DEFINE2(lstat64, const char __user *, filename,
 
 SYSCALL_DEFINE2(fstat64, unsigned long, fd, struct stat64 __user *, statbuf)
 {
-	struct kstat stat;
-	int error = vfs_fstat(fd, &stat);
+struct kstat stat;
+int error = vfs_fstat(fd, &stat);
 
 	if (!error)
 		error = cp_new_stat64(&stat, statbuf);
@@ -1704,10 +1704,10 @@ SYSCALL_DEFINE2(fstat64, unsigned long, fd, struct stat64 __user *, statbuf)
 }
 
 SYSCALL_DEFINE4(fstatat64, int, dfd, const char __user *, filename,
-		struct stat64 __user *, statbuf, int, flag)
+struct stat64 __user *, statbuf, int, flag)
 {
-	struct kstat stat;
-	int error;
+struct kstat stat;
+int error;
 
 	error = vfs_fstatat(dfd, filename, &stat, flag);
 	if (error)
@@ -1719,7 +1719,7 @@ SYSCALL_DEFINE4(fstatat64, int, dfd, const char __user *, filename,
 static noinline_for_stack int
 cp_statx(const struct kstat *stat, struct statx __user *buffer)
 {
-	struct statx tmp;
+struct statx tmp;
 
 	memset(&tmp, 0, sizeof(tmp));
 
@@ -1754,10 +1754,10 @@ cp_statx(const struct kstat *stat, struct statx __user *buffer)
 }
 
 int do_statx(int dfd, struct filename *filename, unsigned int flags,
-	     unsigned int mask, struct statx __user *buffer)
+unsigned int mask, struct statx __user *buffer)
 {
-	struct kstat stat;
-	int error;
+struct kstat stat;
+int error;
 
 	if (mask & STATX__RESERVED)
 		return -EINVAL;
@@ -1772,35 +1772,35 @@ int do_statx(int dfd, struct filename *filename, unsigned int flags,
 }
 
 /**
- * sys_statx - System call to get enhanced stats
- * @dfd: Base directory to pathwalk from *or* fd to stat.
- * @filename: File to stat or "" with AT_EMPTY_PATH
- * @flags: AT_* flags to control pathwalk.
- * @mask: Parts of statx struct actually required.
- * @buffer: Result buffer.
- *
- * Note that fstat() can be emulated by setting dfd to the fd of interest,
- * supplying "" as the filename and setting AT_EMPTY_PATH in the flags.
- */
-SYSCALL_DEFINE5(statx,
-		int, dfd, const char __user *, filename, unsigned, flags,
-		unsigned int, mask,
-		struct statx __user *, buffer)
-{
-	int ret;
-	struct filename *name;
+* sys_statx - System call to get enhanced stats
+* @dfd: Base directory to pathwalk from *or* fd to stat.
+* @filename: File to stat or "" with AT_EMPTY_PATH
+* @flags: AT_* flags to control pathwalk.
+* @mask: Parts of statx struct actually required.
+* @buffer: Result buffer.
+*
+* Note that fstat() can be emulated by setting dfd to the fd of interest,
+* supplying "" as the filename and setting AT_EMPTY_PATH in the flags.
+  */
+  SYSCALL_DEFINE5(statx,
+  int, dfd, const char __user *, filename, unsigned, flags,
+  unsigned int, mask,
+  struct statx __user *, buffer)
+  {
+  int ret;
+  struct filename *name;
 
-	name = getname_flags(filename, getname_statx_lookup_flags(flags), NULL);
-	ret = do_statx(dfd, name, flags, mask, buffer);
-	putname(name);
+  name = getname_flags(filename, getname_statx_lookup_flags(flags), NULL);
+  ret = do_statx(dfd, name, flags, mask, buffer);
+  putname(name);
 
-	return ret;
-}
+  return ret;
+  }
 
 #if defined(CONFIG_COMPAT) && defined(__ARCH_WANT_COMPAT_STAT)
 static int cp_compat_stat(struct kstat *stat, struct compat_stat __user *ubuf)
 {
-	struct compat_stat tmp;
+struct compat_stat tmp;
 
 	if (sizeof(tmp.st_dev) < 4 && !old_valid_dev(stat->dev))
 		return -EOVERFLOW;
@@ -1834,10 +1834,10 @@ static int cp_compat_stat(struct kstat *stat, struct compat_stat __user *ubuf)
 }
 
 COMPAT_SYSCALL_DEFINE2(newstat, const char __user *, filename,
-		       struct compat_stat __user *, statbuf)
+struct compat_stat __user *, statbuf)
 {
-	struct kstat stat;
-	int error;
+struct kstat stat;
+int error;
 
 	error = vfs_stat(filename, &stat);
 	if (error)
@@ -1846,10 +1846,10 @@ COMPAT_SYSCALL_DEFINE2(newstat, const char __user *, filename,
 }
 
 COMPAT_SYSCALL_DEFINE2(newlstat, const char __user *, filename,
-		       struct compat_stat __user *, statbuf)
+struct compat_stat __user *, statbuf)
 {
-	struct kstat stat;
-	int error;
+struct kstat stat;
+int error;
 
 	error = vfs_lstat(filename, &stat);
 	if (error)
@@ -1859,11 +1859,11 @@ COMPAT_SYSCALL_DEFINE2(newlstat, const char __user *, filename,
 
 #ifndef __ARCH_WANT_STAT64
 COMPAT_SYSCALL_DEFINE4(newfstatat, unsigned int, dfd,
-		       const char __user *, filename,
-		       struct compat_stat __user *, statbuf, int, flag)
+const char __user *, filename,
+struct compat_stat __user *, statbuf, int, flag)
 {
-	struct kstat stat;
-	int error;
+struct kstat stat;
+int error;
 
 	error = vfs_fstatat(dfd, filename, &stat, flag);
 	if (error)
@@ -1873,10 +1873,10 @@ COMPAT_SYSCALL_DEFINE4(newfstatat, unsigned int, dfd,
 #endif
 
 COMPAT_SYSCALL_DEFINE2(newfstat, unsigned int, fd,
-		       struct compat_stat __user *, statbuf)
+struct compat_stat __user *, statbuf)
 {
-	struct kstat stat;
-	int error = vfs_fstat(fd, &stat);
+struct kstat stat;
+int error = vfs_fstat(fd, &stat);
 
 	if (!error)
 		error = cp_compat_stat(&stat, statbuf);
@@ -1887,50 +1887,50 @@ COMPAT_SYSCALL_DEFINE2(newfstat, unsigned int, fd,
 /* Caller is here responsible for sufficient locking (ie. inode->i_lock) */
 void __inode_add_bytes(struct inode *inode, loff_t bytes)
 {
-	inode->i_blocks += bytes >> 9;
-	bytes &= 511;
-	inode->i_bytes += bytes;
-	if (inode->i_bytes >= 512) {
-		inode->i_blocks++;
-		inode->i_bytes -= 512;
-	}
+inode->i_blocks += bytes >> 9;
+bytes &= 511;
+inode->i_bytes += bytes;
+if (inode->i_bytes >= 512) {
+inode->i_blocks++;
+inode->i_bytes -= 512;
+}
 }
 EXPORT_SYMBOL(__inode_add_bytes);
 
 void inode_add_bytes(struct inode *inode, loff_t bytes)
 {
-	spin_lock(&inode->i_lock);
-	__inode_add_bytes(inode, bytes);
-	spin_unlock(&inode->i_lock);
+spin_lock(&inode->i_lock);
+__inode_add_bytes(inode, bytes);
+spin_unlock(&inode->i_lock);
 }
 
 EXPORT_SYMBOL(inode_add_bytes);
 
 void __inode_sub_bytes(struct inode *inode, loff_t bytes)
 {
-	inode->i_blocks -= bytes >> 9;
-	bytes &= 511;
-	if (inode->i_bytes < bytes) {
-		inode->i_blocks--;
-		inode->i_bytes += 512;
-	}
-	inode->i_bytes -= bytes;
+inode->i_blocks -= bytes >> 9;
+bytes &= 511;
+if (inode->i_bytes < bytes) {
+inode->i_blocks--;
+inode->i_bytes += 512;
+}
+inode->i_bytes -= bytes;
 }
 
 EXPORT_SYMBOL(__inode_sub_bytes);
 
 void inode_sub_bytes(struct inode *inode, loff_t bytes)
 {
-	spin_lock(&inode->i_lock);
-	__inode_sub_bytes(inode, bytes);
-	spin_unlock(&inode->i_lock);
+spin_lock(&inode->i_lock);
+__inode_sub_bytes(inode, bytes);
+spin_unlock(&inode->i_lock);
 }
 
 EXPORT_SYMBOL(inode_sub_bytes);
 
 loff_t inode_get_bytes(struct inode *inode)
 {
-	loff_t ret;
+loff_t ret;
 
 	spin_lock(&inode->i_lock);
 	ret = __inode_get_bytes(inode);
@@ -1942,10 +1942,10 @@ EXPORT_SYMBOL(inode_get_bytes);
 
 void inode_set_bytes(struct inode *inode, loff_t bytes)
 {
-	/* Caller is here responsible for sufficient locking
-	 * (ie. inode->i_lock) */
-	inode->i_blocks = bytes >> 9;
-	inode->i_bytes = bytes & 511;
+/* Caller is here responsible for sufficient locking
+* (ie. inode->i_lock) */
+inode->i_blocks = bytes >> 9;
+inode->i_bytes = bytes & 511;
 }
 
 EXPORT_SYMBOL(inode_set_bytes);
