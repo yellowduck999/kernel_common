@@ -14,7 +14,7 @@
 #include <linux/dcache.h>
 #include <linux/namei.h>
 #include <linux/quotaops.h>
-#include <linux/timekeeping.h>
+#include <linux/ktime.h>
 #include "f2fs.h"
 #include "node.h"
 #include "segment.h"
