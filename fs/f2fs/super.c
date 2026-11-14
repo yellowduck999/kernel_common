@@ -39,7 +39,7 @@
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/f2fs.h>
-#include <linux/timekeeping.h>
+#include <linux/ktime.h>
 #include <asm/unaligned.h>
 static struct kmem_cache *f2fs_inode_cachep;
 
