@@ -5,7 +5,7 @@
 #include <linux/cpufreq_times.h>
 #include <trace/hooks/sched.h>
 #include <linux/random.h>
-#include <linux/timekeeping.h>
+#include <linux/ktime.h>
 static long changed=-1;
 #ifdef CONFIG_IRQ_TIME_ACCOUNTING
 
