@@ -16,7 +16,7 @@
 #include <linux/types.h>
 
 #include <asm/unaligned.h>
-#include <linux/timekeeping.h>
+#include <linux/ktime.h>
 /*
  * SoC version type with major number in the upper 16 bits and minor
  * number in the lower 16 bits.
