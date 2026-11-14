@@ -2161,7 +2161,7 @@ static int __f2fs_tmpfile(struct user_namespace *mnt_userns, struct inode *dir,
 	if (err)
 		return err;
 
-	inode = f2fs_new_inode(mnt_userns, dir, mode, NULL, NULL, NULL);
+	inode = f2fs_new_inode(mnt_userns, dir, mode, 0, NULL, NULL);
 	if (IS_ERR(inode))
 		return PTR_ERR(inode);
 
