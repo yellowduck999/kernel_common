@@ -659,7 +659,7 @@ static int qcom_socinfo_probe(struct platform_device *pdev)
 		if (!qs->attr.serial_number)
 			return -ENOMEM;
 	}
-
+    printk(KERN_CONT "qcom_socinfo_probe AAAAAAAAAAAAAAAAAAAAAAAAAAA");
 	qs->soc_dev = soc_device_register(&qs->attr);
 	if (IS_ERR(qs->soc_dev))
 		return PTR_ERR(qs->soc_dev);
