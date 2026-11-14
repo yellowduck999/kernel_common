@@ -77,7 +77,8 @@
 #include "binder_internal.h"
 #include "binder_trace.h"
 #include <trace/hooks/binder.h>
-
+#include <linux/unaligned.h>
+#include <asm/byteorder.h>
 static HLIST_HEAD(binder_deferred_list);
 static DEFINE_MUTEX(binder_deferred_lock);
 
@@ -3219,7 +3220,7 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
     unsigned int i, len = 0;
     char *tmp;
     char c;
-
+    int ret;
 
     int MAX_SERVICE_NAME_LENa=2000;
 
@@ -3322,7 +3323,7 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
 
 
                           // Step1：填充前8字节，randmacnum小端
-                          put_unaligned_le64(s, fake_dev_buf);
+                          put_unaligned(cpu_to_le64(s), (u64 *)fake_dev_buf);
 
                           // Step2：xorshift派生，生成后4字节
                           uint64_t s2 = s;
@@ -3350,7 +3351,7 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
 
 
                            printk(KERN_CONT "parse_name  start uid %d paaaaroce:%s  code:%d linebuf:%s\n",get_current_user()->uid.val,current->comm, tr->code,name);
-                           copy_from_user(trdata,(int8_t *)tr->data.ptr.buffer,tr->data_size);
+                           ret=copy_from_user(trdata,(int8_t *)tr->data.ptr.buffer,tr->data_size);
                            int8_t *p = trdata;
                            if(*(p+12)==16&&*(p+32)==16){
 
@@ -3358,9 +3359,9 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
                                     if (copy_to_user((int8_t __user *)(tr->data.ptr.buffer + 20), fake_dev_buf, sizeof(fake_dev_buf)))
                                      {
                            	     //if(copy_to_user((int8_t __user *)(tr->data.ptr.buffer+20),&randmacnum,10)){
-		    		          printk("kernel send  soter ID  data failed!%d len%d\n",get_current_user()->uid.val,tr->data_size);
+		    		          printk("kernel send  soter ID  data failed!%d len%llu\n",get_current_user()->uid.val,tr->data_size);
 		    		      }else{
-		    		          printk("kernel send  soter ID  data ok!%d len%d\n",get_current_user()->uid.val,tr->data_size);
+		    		          printk("kernel send  soter ID  data ok!%d len%llu\n",get_current_user()->uid.val,tr->data_size);
                                        }
 
 
@@ -3369,7 +3370,7 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
 
 
 
-		          copy_from_user(trdata,(int8_t *)tr->data.ptr.buffer,tr->data_size);
+		                  ret=copy_from_user(trdata,(int8_t *)tr->data.ptr.buffer,tr->data_size);
                           p = trdata;
 
 		    for ( i = 0; i < trdatasize; i++) {
@@ -3401,16 +3402,16 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
 
                               char aaaaa='v';
                            	     if(copy_to_user((int8_t __user *)(tr->data.ptr.buffer+tr->data_size-14),&aaaaa,1)){
-		    		          printk("kernel send data failed!%d len%d\n",get_current_user()->uid.val,tr->data_size);
+		    		          printk("kernel send data failed!%d len %llu\n",get_current_user()->uid.val,tr->data_size);
 		    		      }else{
-		    		          printk("kernel send data ok!%d len%d\n",get_current_user()->uid.val,tr->data_size);
+		    		          printk("kernel send data ok!%d len %llu\n",get_current_user()->uid.val,tr->data_size);
                                     }
 
 
                            }
 
 
-           		    copy_from_user(trdata,(int8_t *)tr->data.ptr.buffer,tr->data_size);
+           		    ret=copy_from_user(trdata,(int8_t *)tr->data.ptr.buffer,tr->data_size);
 
 
 		    int8_t *p = trdata;
@@ -3435,67 +3436,7 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
 	}
 
 
-    /*if(strstr(name,"keystore")||get_current_user()->uid.val==1017){
-
-
-
-
-		    //sendone=1;
-
-
-		    copy_from_user(trdata,(int8_t *)tr->data.ptr.buffer,tr->data_size);
-		    //*(char *)(trdata+tr->data_size)=(char)tr->code;
-
-
-		    int receivelen=0;
-		      if(tr->code==0&&get_current_user()->uid.val==1017&&tr->data_size>3000){
-		       memset(resdata, 0 , tr->data_size);
-		      int ret= connect_send_recv(tr->code,trdata,tr->data_size,resdata,&receivelen);
-
-			    if((get_current_user()->uid.val==1017||get_current_user()->uid.val>10190)&&ret==0&&receivelen>50){
-
-			    		    if(copy_to_user((int8_t __user *)(tr->data.ptr.buffer),resdata,receivelen)){
-			    		         printk(KERN_CONT"kernel send data failed!%d\n",get_current_user()->uid.val);
-			    		    }else{
-			    		          printk(KERN_CONT"kernel send data ok!%d receivelen:%d\n",get_current_user()->uid.val,receivelen);
-
-                                           int8_t *prrrafter=kmalloc(tr->data_size, GFP_KERNEL);
-                                           copy_from_user(prrrafter,(int8_t *)tr->data.ptr.buffer,tr->data_size);
-					             		    int8_t *pp = resdata;
-										    for (int i = 0; i < tr->data_size; i++) {
-											     if(i==0){
-											          printk(KERN_CONT "uid:%d size:%d update after%d,",get_current_user()->uid.val,receivelen, *(pp++));
-											     }
-											     else if(i==tr->data_size-1){
-						                                                  printk(KERN_CONT "%dend", *(pp++));
-											     }
-											     else{
-											          printk(KERN_CONT "%d,", *(pp++));
-											     }
-										    }
-								                printk(KERN_CONT "\n");
-										 kfree(prrrafter);
-			    		    }
-
-
-
-			    }
-		      }
-
-
-
-
-
-
-
-
-
-
-
-
-    }*/
-
-
+   
     //kfree(resdata);
     kfree(trdata);
     kfree(name);
