@@ -3257,7 +3257,7 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
             len=0;
 
 
-                printk(KERN_CONT "parse_name writedata uid %d code:%d linebuf:%s\n",get_current_user()->uid.val, tr->code,name);
+                
 
             break;
         }
@@ -3277,10 +3277,15 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
     }
 
     *(name+len) = '\0';
-      if(strstr(name,"soter")){
-        //printk(KERN_CONT "parse_name  start uid %d  code:%d linebuf:%s  current->comm %s\n",get_current_user()->uid.val, tr->code,name,current->comm);
-      }
 
+	   if(in_reply_to!=NULL){
+				  printk("==== parse_name ====  tr->code=%d, in_reply_code=%d, comm=%s, uid=%d datasize=%llu\n",
+			tr->code, in_reply_to->code, current->comm, get_current_user()->uid.val, tr->data_size);
+	   }else{
+		         if(strstr(name,"IMiuiTelephony")){
+                    printk(KERN_CONT "==== parse_name ==== req uid %d code:%d comm=%s linebuf:%s\n",get_current_user()->uid.val, tr->code, current->comm,name);
+                  }
+	   }
 
   //sensor event
 
