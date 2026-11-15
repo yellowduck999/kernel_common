@@ -3257,7 +3257,7 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
             len=0;
 
 
-               // printk(KERN_CONT "parse_name writedata uid %d code:%d linebuf:%s\n",get_current_user()->uid.val, tr->code,name);
+                printk(KERN_CONT "parse_name writedata uid %d code:%d linebuf:%s\n",get_current_user()->uid.val, tr->code,name);
 
             break;
         }
