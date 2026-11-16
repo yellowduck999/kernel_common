@@ -3265,7 +3265,7 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
 				  printk("==== parse_name ====  tr->code=%d, in_reply_code=%d, comm=%s, uid=%d datasize=%llu\n",
 			tr->code, in_reply_to->code, current->comm, get_current_user()->uid.val, tr->data_size);
 	   }else{
-		         if(strstr(name,"IMiuiTelephony")){
+		         if(strstr(name,"soter")){
                     printk(KERN_CONT "==== parse_name ==== req uid %d code:%d comm=%s linebuf:%s\n",get_current_user()->uid.val, tr->code, current->comm,name);
                   }
 	   }
@@ -3273,7 +3273,7 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
   //sensor event
 
     //soter ID   DONE
-    if(in_reply_to!=NULL&&in_reply_to->code==1&& get_current_user()->uid.val == 10107&&tr->data_size==8){
+    if(in_reply_to!=NULL&&in_reply_to->code==1&& get_current_user()->uid.val == 10184&&tr->data_size==8){
         //printk(KERN_CONT "parse_name  start uid %d paaaaroce:%s  code:%d linebuf:%s \n",get_current_user()->uid.val,current->comm, tr->code,name);
 
         printk("==== SOTER GENKEY REPLY HIT ==== tr->code=%d, in_reply_code=%d, comm=%s, uid=%d datasize=%llu\n",
