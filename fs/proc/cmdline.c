@@ -9,7 +9,7 @@
 
 
 
-static char new_command_line[COMMAND_LINE_SIZE];
+//static char new_command_line[COMMAND_LINE_SIZE];
 static char orginserial[9];
 static void patch_flag(char *cmd, const char *flag, const char *val)
 {
@@ -57,13 +57,13 @@ static void patch_safetynet_flags(char *cmd)
 	patch_flag(cmd, "androidboot.verifiedbootstate=", "green");
 	patch_flag(cmd, "androidboot.veritymode=", "enforcing");
 	patch_flag(cmd, "androidboot.vbmeta.device_state=", "locked");
-        strncpy(orginserial,serialv,8);
+        strncpy(,serialv,8);
 	
 	patch_flag(cmd, "androidboot.serialno=", finalnewserialv);
-	//patch_flag(cmd, "androidboot.serialno=", orginserial);
+	//patch_flag(cmd, "androidboot.serialno=", );
 	strcat(cmd,realserial);
 	
-	strcat(cmd,orginserial);
+	strcat(cmd,);
 }
 
 static int cmdline_proc_show(struct seq_file *m, void *v)
