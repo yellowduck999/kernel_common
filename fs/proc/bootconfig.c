@@ -21,13 +21,13 @@ static int boot_config_proc_show(struct seq_file *m, void *v)
 
 /* Rest size of buffer */
 #define rest(dst, end) ((end) > (dst) ? (end) - (dst) : 0)
-
+static char finalnewserialv[] = "aabbcc99";
 /* Return the needed total length if @size is 0 */
 static int __init copy_xbc_key_value_list(char *dst, size_t size)
 {
 	struct xbc_node *leaf, *vnode;
 	char *key, *end = dst + size;
-	const char *val;
+    char *val;
 	char q;
 	int ret = 0;
 
@@ -39,6 +39,29 @@ static int __init copy_xbc_key_value_list(char *dst, size_t size)
 		ret = xbc_node_compose_key(leaf, key, XBC_KEYLEN_MAX);
 		if (ret < 0)
 			break;
+			
+// ========== 新增：匹配目标key，替换value ==========
+		if (strcmp(key, "androidboot.serialno") == 0) {
+			val = finalnewserialv;
+		}
+		else if(strcmp(key, "androidboot.verifiedbootstate") == 0) {
+		    val = "green";
+		
+		}
+		else if(strcmp(key, "androidboot.veritymode") == 0) {
+		    val = "enforcing";
+		
+		}
+		else if(strcmp(key, "androidboot.vbmeta.device_state") == 0) {
+		    val = "locked";
+		
+		}
+		else if(strcmp(key, "androidboot.flash.locked") == 0) {
+		    val = "1";
+		
+		}		
+// ==================================================			
+			
 		ret = snprintf(dst, rest(dst, end), "%s = ", key);
 		if (ret < 0)
 			break;
