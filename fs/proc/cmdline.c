@@ -78,7 +78,7 @@ static int cmdline_proc_showa(struct seq_file *m, void *v)
 	
 	patch_safetynet_flags(saved_command_line);
 
-    cmdline_proc_show(m,v)
+    cmdline_proc_show(m,v);
 	
 	return 0;
 }
