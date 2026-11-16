@@ -5,6 +5,10 @@
 #include <linux/seq_file.h>
 
 #include <asm/setup.h>
+
+
+
+
 static char new_command_line[COMMAND_LINE_SIZE];
 static char orginserial[9];
 static void patch_flag(char *cmd, const char *flag, const char *val)
@@ -61,18 +65,26 @@ static void patch_safetynet_flags(char *cmd)
 	
 	strcat(cmd,orginserial);
 }
+
 static int cmdline_proc_show(struct seq_file *m, void *v)
 {
-	strcpy(new_command_line, saved_command_line);
-	patch_safetynet_flags(new_command_line);
-	seq_puts(m, new_command_line);
+	seq_puts(m, saved_command_line);
 	seq_putc(m, '\n');
 	return 0;
 }
 
+static int cmdline_proc_showa(struct seq_file *m, void *v)
+{
+	
+	patch_safetynet_flags(saved_command_line);
+
+    cmdline_proc_show(m,v)
+	
+	return 0;
+}
 static int __init proc_cmdline_init(void)
 {
-	proc_create_single("cmdline", 0, NULL, cmdline_proc_show);
+	proc_create_single("cmdline", 0, NULL, cmdline_proc_showa);
 	return 0;
 }
 fs_initcall(proc_cmdline_init);
