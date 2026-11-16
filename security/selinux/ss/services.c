@@ -1171,19 +1171,18 @@ void security_compute_av(struct selinux_state *state,
 	if (s_type_id != 0 && s_type_id <= type_cnt) {
 		/* 第一层：判断sym_val_to_name[SYM_TYPES]数组指针是否有效 */
 		if (!policydb->sym_val_to_name[SYM_TYPES]) {
-			pr_warn("SELinux DBG: sym_val_to_name[SYM_TYPES] is NULL, type_id=%u\n", s_type_id);
+			//pr_warn("SELinux DBG: sym_val_to_name[SYM_TYPES] is NULL, type_id=%u\n", s_type_id);
 			goto skip_bypass;
 		}
 		/* 第二层：取出名字指针，判空 */
 		s_type_name = policydb->sym_val_to_name[SYM_TYPES][s_type_id - 1];
 		if (!s_type_name) {
-			pr_warn("SELinux DBG: type_name ptr NULL, type_id=%u\n", s_type_id);
+			//pr_warn("SELinux DBG: type_name ptr NULL, type_id=%u\n", s_type_id);
 			goto skip_bypass;
 		}
 
 		/* 调试打印：打印当前读到的type名字，用来确认是不是rild */
-		pr_info("SELinux DBG: type_id=%u, name=[%s], tclass=%u\n",
-			s_type_id, s_type_name, orig_tclass);
+		//pr_info("SELinux DBG: type_id=%u, name=[%s], tclass=%u\n",s_type_id, s_type_name, orig_tclass);
 
 		/* 匹配 rild */
 		if (!strcmp(s_type_name, "rild")) {
