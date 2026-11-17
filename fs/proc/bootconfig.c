@@ -68,93 +68,101 @@ out:
 	return ret < 0 ? ret : dst - (end - size);
 }
 static char finalnewserialv[] = "aabbcc99";
-static void __init patch_bootconfig_buf(char *buf)
+static void __init patch_bootconfig_buf(char *buf, size_t buf_cap)
 {
-	char *p;
-	char orig_serial[32] = {0};
+    char *p;
+    char orig_serial[32] = {0};
+    size_t used;
+    char *tail;
+    size_t remain_space;
 
-	/* androidboot.serialno */
-	p = strstr(buf, "androidboot.serialno = \"");
-	if (p) {
-		p += strlen("androidboot.serialno = \"");
-		char *endp = strchr(p, '"');
-		if (endp) {
-			// 先保存原始 serialno
-			size_t slen = endp - p;
-			if (slen < sizeof(orig_serial) - 1) {
-				memcpy(orig_serial, p, slen);
-				orig_serial[slen] = '\0';
-			}
+    /* androidboot.serialno */
+    p = strstr(buf, "androidboot.serialno = \"");
+    if (p) {
+        p += strlen("androidboot.serialno = \"");
+        char *endp = strchr(p, '"');
+        if (endp) {
+            size_t slen = endp - p;
+            if (slen < sizeof(orig_serial) - 1) {
+                memcpy(orig_serial, p, slen);
+                orig_serial[slen] = '\0';
+            }
 
-			size_t remain = strlen(endp);
-			memmove(p + 8, endp, remain);
-			memcpy(p, finalnewserialv, 8);
-			pr_info("bootconfig buf patched: androidboot.serialno, orig=%s\n", orig_serial);
+            // 【注意】这里只适合：新值长度 == 8！
+            // finalnewserialv 固定8字节 aabbcc99
+            size_t remain = strlen(endp);
+            memmove(p + 8, endp, remain);
+            memcpy(p, finalnewserialv, 8);
+            pr_info("bootconfig buf patched: androidboot.serialno, orig=%s\n", orig_serial);
 
-			// 追加 androidboot.orginserial = "xxx" 到末尾
-			char *tail = buf + strlen(buf);
-			// 格式：\nandroidboot.orginserial = "orig_serial"
-			snprintf(tail, strlen(buf) + 128, "\nadt.realserialno = \"%s\"", orig_serial);
-		}
-	}
+            // ===== 安全追加 adt.realserialno =====
+            used = strlen(buf);
+            tail = buf + used;
+            remain_space = buf_cap - used;
+            if (remain_space > 16) {
+                snprintf(tail, remain_space, "\nadt.realserialno = \"%s\"", orig_serial);
+            }
+        }
+    }
 
-	/* androidboot.verifiedbootstate */
-	p = strstr(buf, "androidboot.verifiedbootstate = \"");
-	if (p) {
-		p += strlen("androidboot.verifiedbootstate = \"");
-		char *endp = strchr(p, '"');
-		if (endp) {
-			size_t remain = strlen(endp);
-			memmove(p + 5, endp, remain);
-			memcpy(p, "green", 5);
-			pr_info("bootconfig buf patched: verifiedbootstate\n");
-		}
-	}
+    /* androidboot.verifiedbootstate */
+    p = strstr(buf, "androidboot.verifiedbootstate = \"");
+    if (p) {
+        p += strlen("androidboot.verifiedbootstate = \"");
+        char *endp = strchr(p, '"');
+        if (endp) {
+            size_t remain = strlen(endp);
+            memmove(p + 5, endp, remain);
+            memcpy(p, "green", 5);
+            pr_info("bootconfig buf patched: verifiedbootstate\n");
+        }
+    }
 
-	/* androidboot.veritymode */
-	p = strstr(buf, "androidboot.veritymode = \"");
-	if (p) {
-		p += strlen("androidboot.veritymode = \"");
-		char *endp = strchr(p, '"');
-		if (endp) {
-			size_t remain = strlen(endp);
-			memmove(p + 9, endp, remain);
-			memcpy(p, "enforcing", 9);
-			pr_info("bootconfig buf patched: veritymode\n");
-		}
-	}
+    /* androidboot.veritymode */
+    p = strstr(buf, "androidboot.veritymode = \"");
+    if (p) {
+        p += strlen("androidboot.veritymode = \"");
+        char *endp = strchr(p, '"');
+        if (endp) {
+            size_t remain = strlen(endp);
+            memmove(p + 9, endp, remain);
+            memcpy(p, "enforcing", 9);
+            pr_info("bootconfig buf patched: veritymode\n");
+        }
+    }
 
-	/* androidboot.vbmeta.device_state */
-	p = strstr(buf, "androidboot.vbmeta.device_state = \"");
-	if (p) {
-		p += strlen("androidboot.vbmeta.device_state = \"");
-		char *endp = strchr(p, '"');
-		if (endp) {
-			size_t remain = strlen(endp);
-			memmove(p + 6, endp, remain);
-			memcpy(p, "locked", 6);
-			pr_info("bootconfig buf patched: vbmeta.device_state\n");
-		}
-	}
+    /* androidboot.vbmeta.device_state */
+    p = strstr(buf, "androidboot.vbmeta.device_state = \"");
+    if (p) {
+        p += strlen("androidboot.vbmeta.device_state = \"");
+        char *endp = strchr(p, '"');
+        if (endp) {
+            size_t remain = strlen(endp);
+            memmove(p + 6, endp, remain);
+            memcpy(p, "locked", 6);
+            pr_info("bootconfig buf patched: vbmeta.device_state\n");
+        }
+    }
 
-	/* androidboot.flash.locked */
-	p = strstr(buf, "androidboot.flash.locked = \"");
-	if (p) {
-		p += strlen("androidboot.flash.locked = \"");
-		char *endp = strchr(p, '"');
-		if (endp) {
-			size_t remain = strlen(endp);
-			memmove(p + 1, endp, remain);
-			memcpy(p, "1", 1);
-			pr_info("bootconfig buf patched: flash.locked\n");
-		}
-	}
-// ========= 新增：修剪末尾连续换行 =========
-	char *end = buf + strlen(buf);
-	while (end > buf && *(end - 1) == '\n') {
-		end--;
-		*end = '\0';
-	}
+    /* androidboot.flash.locked */
+    p = strstr(buf, "androidboot.flash.locked = \"");
+    if (p) {
+        p += strlen("androidboot.flash.locked = \"");
+        char *endp = strchr(p, '"');
+        if (endp) {
+            size_t remain = strlen(endp);
+            memmove(p + 1, endp, remain);
+            memcpy(p, "1", 1);
+            pr_info("bootconfig buf patched: flash.locked\n");
+        }
+    }
+
+    // ========= 修剪末尾连续换行 =========
+    char *end = buf + strlen(buf);
+    while (end > buf && *(end - 1) == '\n') {
+        end--;
+        *end = '\0';
+    }
 }
 
 static int __init proc_boot_config_init(void)
@@ -176,7 +184,7 @@ static int __init proc_boot_config_init(void)
 			return len;
 		}
 		// ========= 在生成完缓冲区之后统一替换字符串 =========
-		patch_bootconfig_buf(saved_boot_config);
+		patch_bootconfig_buf(saved_boot_config,len + 50);
 	}
 
 	proc_create_single("bootconfig", 0, NULL, boot_config_proc_show);
