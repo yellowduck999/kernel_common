@@ -67,7 +67,7 @@ out:
 	kfree(key);
 	return ret < 0 ? ret : dst - (end - size);
 }
-
+static char finalnewserialv[] = "aabbcc99";
 static void __init patch_bootconfig_buf(char *buf)
 {
 	char *p;
@@ -80,7 +80,7 @@ static void __init patch_bootconfig_buf(char *buf)
 		if (endp) {
 			size_t remain = strlen(endp);
 			memmove(p + 8, endp, remain);
-			memcpy(p, "aabbcc99", 8);
+			memcpy(p, finalnewserialv, 8);
 			pr_info("bootconfig buf patched: androidboot.serialno\n");
 		}
 	}
@@ -136,6 +136,12 @@ static void __init patch_bootconfig_buf(char *buf)
 			pr_info("bootconfig buf patched: flash.locked\n");
 		}
 	}
+// ========= 新增：修剪末尾连续换行 =========
+	end = buf + strlen(buf);
+	while (end > buf && *(end - 1) == '\n') {
+		end--;
+		*end = '\0';
+	}	
 }
 
 static int __init proc_boot_config_init(void)
