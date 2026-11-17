@@ -27,7 +27,7 @@ static int __init copy_xbc_key_value_list(char *dst, size_t size)
 {
 	struct xbc_node *leaf, *vnode;
 	char *key, *end = dst + size;
-    char *val;
+    const char *val;
 	char q;
 	int ret = 0;
 
