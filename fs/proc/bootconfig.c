@@ -59,7 +59,8 @@ static int __init copy_xbc_key_value_list(char *dst, size_t size)
 		else if(strcmp(key, "androidboot.flash.locked") == 0) {
 		    val = "1";
 		
-		}		
+		}
+		printk(KERN_CONT "copy_xbc_key_value_list KEY %s",key);
 // ==================================================			
 			
 		ret = snprintf(dst, rest(dst, end), "%s = ", key);
