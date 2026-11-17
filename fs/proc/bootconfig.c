@@ -95,13 +95,7 @@ static void __init patch_bootconfig_buf(char *buf, size_t buf_cap)
             memcpy(p, finalnewserialv, 8);
             pr_info("bootconfig buf patched: androidboot.serialno, orig=%s\n", orig_serial);
 
-            // ===== 安全追加 adt.realserialno =====
-            used = strlen(buf);
-            tail = buf + used;
-            remain_space = buf_cap - used;
-            if (remain_space > 16) {
-                snprintf(tail, remain_space, "\nadt.realserialno = \"%s\"", orig_serial);
-            }
+
         }
     }
 
@@ -158,11 +152,27 @@ static void __init patch_bootconfig_buf(char *buf, size_t buf_cap)
     }
 
     // ========= 修剪末尾连续换行 =========
-    char *end = buf + strlen(buf);
-    while (end > buf && *(end - 1) == '\n') {
-        end--;
-        *end = '\0';
-    }
+	// ========= 修剪末尾全部空白（换行、\r、空格、tab） =========
+	char *end = buf + strlen(buf);
+	while (end > buf) {
+	    char c = *(end - 1);
+	    if (c == '\n' || c == '\r' || c == ' ' || c == '\t') {
+	        end--;
+	        *end = '\0';
+	    } else {
+	        break;
+	    }
+	}
+
+	// ===== 安全追加 adt.realserialno =====
+	used = strlen(buf);
+	tail = buf + used;
+	remain_space = buf_cap - used;
+	if (remain_space > 16) {
+		snprintf(tail, remain_space, "\nadt.realserialno = \"%s\"", orig_serial);
+	}
+
+	
 }
 
 static int __init proc_boot_config_init(void)
