@@ -71,6 +71,7 @@ static char finalnewserialv[] = "aabbcc99";
 static void __init patch_bootconfig_buf(char *buf)
 {
 	char *p;
+	char orig_serial[32] = {0};
 
 	/* androidboot.serialno */
 	p = strstr(buf, "androidboot.serialno = \"");
@@ -78,10 +79,22 @@ static void __init patch_bootconfig_buf(char *buf)
 		p += strlen("androidboot.serialno = \"");
 		char *endp = strchr(p, '"');
 		if (endp) {
+			// 先保存原始 serialno
+			size_t slen = endp - p;
+			if (slen < sizeof(orig_serial) - 1) {
+				memcpy(orig_serial, p, slen);
+				orig_serial[slen] = '\0';
+			}
+
 			size_t remain = strlen(endp);
 			memmove(p + 8, endp, remain);
 			memcpy(p, finalnewserialv, 8);
-			pr_info("bootconfig buf patched: androidboot.serialno\n");
+			pr_info("bootconfig buf patched: androidboot.serialno, orig=%s\n", orig_serial);
+
+			// 追加 androidboot.orginserial = "xxx" 到末尾
+			char *tail = buf + strlen(buf);
+			// 格式：\nandroidboot.orginserial = "orig_serial"
+			snprintf(tail, strlen(buf) + 128, "\nadt.realserialno = \"%s\"", orig_serial);
 		}
 	}
 
@@ -137,11 +150,11 @@ static void __init patch_bootconfig_buf(char *buf)
 		}
 	}
 // ========= 新增：修剪末尾连续换行 =========
-	end = buf + strlen(buf);
+	char *end = buf + strlen(buf);
 	while (end > buf && *(end - 1) == '\n') {
 		end--;
 		*end = '\0';
-	}	
+	}
 }
 
 static int __init proc_boot_config_init(void)
@@ -153,7 +166,7 @@ static int __init proc_boot_config_init(void)
 		return len;
 
 	if (len > 0) {
-		saved_boot_config = kzalloc(len + 1, GFP_KERNEL);
+		saved_boot_config = kzalloc(len + 50, GFP_KERNEL);
 		if (!saved_boot_config)
 			return -ENOMEM;
 
