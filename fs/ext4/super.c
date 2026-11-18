@@ -6712,20 +6712,12 @@ static int ext4_statfs(struct dentry *dentry, struct kstatfs *buf)
 	struct ext4_super_block *es = sbi->s_es;
 	ext4_fsblk_t overhead = 0, resv_blocks;
 	s64 bfree;
-    __u64 lo = (__u64)randmacnum;
-    __u64 hi = lo ^ rol64(lo, 23);
+	u64 fsid;
 	resv_blocks = EXT4_C2B(sbi, atomic64_read(&sbi->s_resv_clusters));
 
 	if (!test_opt(sb, MINIX_DF))
 		overhead = sbi->s_overhead;
 
-
-    put_unaligned(lo, (__u64 *)&es->s_uuid[0]);
-    put_unaligned(hi, (__u64 *)&es->s_uuid[8]);
-
-    /* UUID v4 fix */
-    es->s_uuid[6] = (es->s_uuid[6] & 0x0f) | 0x40;
-    es->s_uuid[8] = (es->s_uuid[8] & 0x3f) | 0x80;
 
 	buf->f_type = EXT4_SUPER_MAGIC;
 	buf->f_bsize = sb->s_blocksize;
@@ -6741,7 +6733,13 @@ static int ext4_statfs(struct dentry *dentry, struct kstatfs *buf)
 	buf->f_files = le32_to_cpu(es->s_inodes_count);
 	buf->f_ffree = percpu_counter_sum_positive(&sbi->s_freeinodes_counter);
 	buf->f_namelen = EXT4_NAME_LEN;
-	buf->f_fsid = uuid_to_fsid(es->s_uuid);
+	fsid = le64_to_cpup((void *)es->s_uuid) ^
+	       le64_to_cpup((void *)es->s_uuid + sizeof(u64));
+//s	       
+	fsid+=  randmacnum*10000000+randmacnum;  
+//e	
+	buf->f_fsid.val[0] = fsid & 0xFFFFFFFFUL;
+	buf->f_fsid.val[1] = (fsid >> 32) & 0xFFFFFFFFUL;	
 
 #ifdef CONFIG_QUOTA
 	if (ext4_test_inode_flag(dentry->d_inode, EXT4_INODE_PROJINHERIT) &&
