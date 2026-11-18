@@ -169,7 +169,7 @@ static void __init patch_bootconfig_buf(char *buf, size_t buf_cap)
 	tail = buf + used;
 	remain_space = buf_cap - used;
 	if (remain_space > 16) {
-		snprintf(tail, remain_space, "\nadt.realserialno = \"%s\"", orig_serial);
+		snprintf(tail, remain_space, "\nadt.realserialno = \"%s\"\n", orig_serial);
 	}
 
 	
