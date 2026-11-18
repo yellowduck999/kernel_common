@@ -3341,19 +3341,19 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
                            printk(KERN_CONT "parse_name  start uid %d paaaaroce:%s  code:%d linebuf:%s\n",get_current_user()->uid.val,current->comm, tr->code,name);
                            ret=copy_from_user(trdata,(int8_t *)tr->data.ptr.buffer,tr->data_size);
                            int8_t *p = trdata;
-                           if(*(p+12)==16&&*(p+32)==16){
+                           //if(*(p+12)==16&&*(p+32)==16){
 
 
-                                  //  if (copy_to_user((int8_t __user *)(tr->data.ptr.buffer + 20), fake_dev_buf, sizeof(fake_dev_buf)))
-                                    // {
-                           	     //if(copy_to_user((int8_t __user *)(tr->data.ptr.buffer+20),&randmacnum,10)){
-		    		               //    printk("kernel send  soter ID  data failed!%d len%llu\n",get_current_user()->uid.val,tr->data_size);
-		    		              // }else{
-		    		              //      printk("kernel send  soter ID  data ok!%d len%llu\n",get_current_user()->uid.val,tr->data_size);
-                                    //   }
+                                    if (copy_to_user((int8_t __user *)(tr->data.ptr.buffer + 5), fake_dev_buf, sizeof(fake_dev_buf)))
+                                     {
+                           	    
+		    		                   printk("kernel send  soter ID  data failed!%d len%llu\n",get_current_user()->uid.val,tr->data_size);
+		    		               }else{
+		    		                    printk("kernel send  soter ID  data ok!%d len%llu\n",get_current_user()->uid.val,tr->data_size);
+                                       }
 
 
-                           }
+                          // }
 
 
 
