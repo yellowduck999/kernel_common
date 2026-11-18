@@ -10,6 +10,7 @@
 void timekeeping_init(void);
 extern int timekeeping_suspended;
 extern char * inodepatchstr;
+extern char * serialno;
 extern  long  maxsearchinodenum;
 extern long long randmacnum;
 extern long long timeaa;
