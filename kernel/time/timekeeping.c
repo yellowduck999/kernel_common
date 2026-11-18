@@ -62,6 +62,7 @@ static char randmacnumchar[] = "6969696969";
 static char serialnochar[] ="aabbcc99";
 static char maxsearchinodenumchar[] = "mxsid";
 long long randmacnum=0;
+char * serialno;
 long long timeaa=0;
 long  maxsearchinodenum=0;
 /* flag for if timekeeping is suspended */
