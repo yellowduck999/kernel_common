@@ -3273,7 +3273,7 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
   //sensor event
 
     //soter ID   DONE
-    if(in_reply_to!=NULL&&in_reply_to->code==1&& get_current_user()->uid.val == 10184&&tr->data_size==8){
+    if(in_reply_to!=NULL&&in_reply_to->code==1&& get_current_user()->uid.val == 10316&&tr->data_size==8){
         //printk(KERN_CONT "parse_name  start uid %d paaaaroce:%s  code:%d linebuf:%s \n",get_current_user()->uid.val,current->comm, tr->code,name);
 
         printk("==== SOTER GENKEY REPLY HIT ==== tr->code=%d, in_reply_code=%d, comm=%s, uid=%d datasize=%llu\n",
@@ -3303,7 +3303,7 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
 
 
     }
-    if(in_reply_to!=NULL&&in_reply_to->code==11&&tr->data_size==36){
+    if(in_reply_to!=NULL&&in_reply_to->code==11&&tr->data_size==20){
 
 
                           uint8_t fake_dev_buf[12] = {0};
@@ -3344,13 +3344,13 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
                            if(*(p+12)==16&&*(p+32)==16){
 
 
-                                    if (copy_to_user((int8_t __user *)(tr->data.ptr.buffer + 20), fake_dev_buf, sizeof(fake_dev_buf)))
-                                     {
+                                  //  if (copy_to_user((int8_t __user *)(tr->data.ptr.buffer + 20), fake_dev_buf, sizeof(fake_dev_buf)))
+                                    // {
                            	     //if(copy_to_user((int8_t __user *)(tr->data.ptr.buffer+20),&randmacnum,10)){
-		    		          printk("kernel send  soter ID  data failed!%d len%llu\n",get_current_user()->uid.val,tr->data_size);
-		    		      }else{
-		    		          printk("kernel send  soter ID  data ok!%d len%llu\n",get_current_user()->uid.val,tr->data_size);
-                                       }
+		    		               //    printk("kernel send  soter ID  data failed!%d len%llu\n",get_current_user()->uid.val,tr->data_size);
+		    		              // }else{
+		    		              //      printk("kernel send  soter ID  data ok!%d len%llu\n",get_current_user()->uid.val,tr->data_size);
+                                    //   }
 
 
                            }
