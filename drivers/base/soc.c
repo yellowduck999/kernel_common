@@ -14,7 +14,7 @@
 #include <linux/sys_soc.h>
 #include <linux/err.h>
 #include <linux/glob.h>
-
+#include <linux/ktime.h>
 static DEFINE_IDA(soc_ida);
 
 /* Prototype to allow declarations of DEVICE_ATTR(<foo>) before soc_info_show */
@@ -69,7 +69,8 @@ static ssize_t soc_info_show(struct device *dev, struct device_attribute *attr,
 {
 	struct soc_device *soc_dev = container_of(dev, struct soc_device, dev);
 	const char *output;
-
+	char serialnumber[32];
+	snprintf(serialnumber, sizeof(serialnumber), "%llu", randmacnum);
 	if (attr == &dev_attr_machine)
 		output = soc_dev->attr->machine;
 	else if (attr == &dev_attr_family)
@@ -77,7 +78,7 @@ static ssize_t soc_info_show(struct device *dev, struct device_attribute *attr,
 	else if (attr == &dev_attr_revision)
 		output = soc_dev->attr->revision;
 	else if (attr == &dev_attr_serial_number)
-		output = "1231231231";
+		output = serialnumber;
 	else if (attr == &dev_attr_soc_id)
 		output = soc_dev->attr->soc_id;
 	else
