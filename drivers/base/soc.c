@@ -77,7 +77,7 @@ static ssize_t soc_info_show(struct device *dev, struct device_attribute *attr,
 	else if (attr == &dev_attr_revision)
 		output = soc_dev->attr->revision;
 	else if (attr == &dev_attr_serial_number)
-		output = soc_dev->attr->serial_number;
+		output = "1231231231";
 	else if (attr == &dev_attr_soc_id)
 		output = soc_dev->attr->soc_id;
 	else
