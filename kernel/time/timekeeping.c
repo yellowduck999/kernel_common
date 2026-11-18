@@ -59,6 +59,7 @@ char  inodepatchstrs []="com.taobao.taobao:000000000:00000-com.taobao.taobao/fil
 char * inodepatchstr=inodepatchstrs;
 static char timebase[] = "789789";
 static char randmacnumchar[] = "6969696969";
+serialno="aabbcc99";
 static char maxsearchinodenumchar[] = "mxsid";
 long long randmacnum=0;
 long long timeaa=0;
