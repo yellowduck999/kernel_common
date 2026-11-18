@@ -1853,7 +1853,7 @@ static int f2fs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	long ri=0;
 	long ri2=0;
 	uint8_t * randmacnumbt=(uint8_t *)&randmacnum;
-    if(strstr(sb->s_id,"dm-39")){
+    if(strstr(sb->s_id,"dm-54")){
         ri=randmacnum%1000000;
         ri+=*randmacnumbt;
         ri+=*(randmacnumbt+1);
