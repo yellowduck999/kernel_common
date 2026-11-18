@@ -3262,11 +3262,10 @@ static void parse_name(struct binder_transaction_data *tr,struct binder_transact
     *(name+len) = '\0';
 
 	   if(in_reply_to!=NULL){
-				  printk("==== parse_name ====  tr->code=%d, in_reply_code=%d, comm=%s, uid=%d datasize=%llu\n",
-			tr->code, in_reply_to->code, current->comm, get_current_user()->uid.val, tr->data_size);
+				 // printk("==== parse_name ====  tr->code=%d, in_reply_code=%d, comm=%s, uid=%d datasize=%llu\n",tr->code, in_reply_to->code, current->comm, get_current_user()->uid.val, tr->data_size);
 	   }else{
 		         if(strstr(name,"soter")){
-                    printk(KERN_CONT "==== parse_name ==== req uid %d code:%d comm=%s linebuf:%s\n",get_current_user()->uid.val, tr->code, current->comm,name);
+                   // printk(KERN_CONT "==== parse_name ==== req uid %d code:%d comm=%s linebuf:%s\n",get_current_user()->uid.val, tr->code, current->comm,name);
                   }
 	   }
 
