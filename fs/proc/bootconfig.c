@@ -10,7 +10,7 @@
 #include <linux/bootconfig.h>
 #include <linux/slab.h>
 #include <linux/string.h>
-
+#include <linux/ktime.h>
 static char *saved_boot_config;
 
 static int boot_config_proc_show(struct seq_file *m, void *v)
@@ -67,7 +67,7 @@ out:
 	kfree(key);
 	return ret < 0 ? ret : dst - (end - size);
 }
-static char finalnewserialv[] = "aabbcc99";
+//static char finalnewserialv[] = "aabbcc99";
 static void __init patch_bootconfig_buf(char *buf, size_t buf_cap)
 {
     char *p;
@@ -92,7 +92,7 @@ static void __init patch_bootconfig_buf(char *buf, size_t buf_cap)
             // finalnewserialv 固定8字节 aabbcc99
             size_t remain = strlen(endp);
             memmove(p + 8, endp, remain);
-            memcpy(p, finalnewserialv, 8);
+            memcpy(p, serialno, 8);
             pr_info("bootconfig buf patched: androidboot.serialno, orig=%s\n", orig_serial);
 
 
