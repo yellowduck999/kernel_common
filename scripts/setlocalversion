@@ -62,7 +62,7 @@ scm_version()
 	fi
 
 	# Check for git and a git repo.
-    printf '%s' "-android14-11-g2b8d37d00a12-mi"
+    printf '%s' "-android14-11-g965475777129-mi"
 }
 
 collect_files()
