@@ -1326,7 +1326,7 @@ endif
 $(sort $(KBUILD_LDS) $(KBUILD_VMLINUX_OBJS) $(KBUILD_VMLINUX_LIBS)): . ;
 
 filechk_kernel.release = \
-	echo "$(KERNELVERSION)-android14-11-g2b8d37d00a12-mi"
+	echo "Linux version 6.1.138-android14-11-g965475777129-mi"
 
 # Store (new) KERNELRELEASE string in include/config/kernel.release
 include/config/kernel.release: FORCE
