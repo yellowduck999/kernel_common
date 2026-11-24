@@ -60,7 +60,7 @@ unexport GREP_OPTIONS
 #         cmd_cc_o_c       = $(CC) $(c_flags) -c -o $@ $<
 #
 # If $(quiet) is empty, the whole command will be printed.
-# If it is set to "quiet_", only the short version will be printed.
+# If it is set to "quiet_", only the short  will be printed.
 # If it is set to "silent_", nothing will be printed at all, since
 # the variable $(silent_cmd_cc_o_c) doesn't exist.
 #
@@ -95,7 +95,7 @@ endif
 # commands
 # make-4.0 (and later) keep single letter options in the 1st word of MAKEFLAGS.
 
-ifeq ($(filter 3.%,$(MAKE_VERSION)),)
+ifeq ($(filter 3.%,$(MAKE_)),)
 silence:=$(findstring s,$(firstword -$(MAKEFLAGS)))
 else
 silence:=$(findstring s,$(filter-out --%,$(MAKEFLAGS)))
@@ -233,7 +233,7 @@ ifneq ($(abs_srctree),$(abs_objtree))
 MAKEFLAGS += --include-dir=$(abs_srctree)
 endif
 
-ifneq ($(filter 3.%,$(MAKE_VERSION)),)
+ifneq ($(filter 3.%,$(MAKE_)),)
 # 'MAKEFLAGS += -rR' does not immediately become effective for GNU Make 3.x
 # We need to invoke sub-make to avoid implicit rules in the top Makefile.
 need-sub-make := 1
@@ -297,13 +297,13 @@ export building_out_of_srctree srctree objtree VPATH
 # Detect when mixed targets is specified, and make a second invocation
 # of make so .config is not included in this case either (for *config).
 
-version_h := include/generated/uapi/linux/version.h
+_h := include/generated/uapi/linux/.h
 
 clean-targets := %clean mrproper cleandocs
 no-dot-config-targets := $(clean-targets) \
 			 cscope gtags TAGS tags help% %docs check% coccicheck \
-			 $(version_h) headers headers_% archheaders archscripts \
-			 %asm-generic kernelversion %src-pkg dt_binding_check \
+			 $(_h) headers headers_% archheaders archscripts \
+			 %asm-generic kernel %src-pkg dt_binding_check \
 			 outputmakefile rustavailable rustfmt rustfmtcheck
 # Installation targets should not require compiler. Unfortunately, vdso_install
 # is an exception where build artifacts may be updated. This must be fixed.
@@ -395,7 +395,7 @@ include $(srctree)/scripts/Kbuild.include
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
-KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
+KERNEL = $()$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
 export VERSION PATCHLEVEL SUBLEVEL KERNELRELEASE KERNELVERSION
 
 include $(srctree)/scripts/subarch.include
@@ -1326,7 +1326,7 @@ endif
 $(sort $(KBUILD_LDS) $(KBUILD_VMLINUX_OBJS) $(KBUILD_VMLINUX_LIBS)): . ;
 
 filechk_kernel.release = \
-	echo "Linux version 6.1.138-android14-11-g965475777129-mi"
+	echo "$(KERNELVERSION)-android14-11-g965475777129-mi"
 
 # Store (new) KERNELRELEASE string in include/config/kernel.release
 include/config/kernel.release: FORCE
