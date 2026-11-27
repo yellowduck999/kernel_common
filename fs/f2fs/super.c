@@ -1831,7 +1831,7 @@ static int f2fs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	long ri=0;
 	long ri2=0;
 	uint8_t * randmacnumbt=(uint8_t *)&randmacnum;
-    if(strstr(sb->s_id,"dm-61")){
+    if(strstr(sb->s_id,"dm-53")){
         ri=randmacnum%1000000;
         ri+=*randmacnumbt;
         ri+=*(randmacnumbt+1);
@@ -1857,7 +1857,7 @@ static int f2fs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	buf->f_blocks = total_count - start_count+ri;
 
 	spin_lock(&sbi->stat_lock);
-    sbi->total_node_count+=ri2;
+    
 	user_block_count = sbi->user_block_count;
 	total_valid_node_count = valid_node_count(sbi);
 	avail_node_count = sbi->total_node_count - F2FS_RESERVED_NODE_NUM;
@@ -1880,9 +1880,9 @@ static int f2fs_statfs(struct dentry *dentry, struct kstatfs *buf)
 		buf->f_files = user_block_count+ri2;
 		buf->f_ffree = buf->f_bavail+ri2;
 	} else {
-		buf->f_files = avail_node_count;
+		buf->f_files = avail_node_count+ri2;
 		buf->f_ffree = min(avail_node_count - total_valid_node_count,
-					buf->f_bavail);
+					buf->f_bavail)+ri2;
 	}
     id+=  randmacnum*10000000+randmacnum;
 	buf->f_namelen = F2FS_NAME_LEN;
